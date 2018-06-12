@@ -1,0 +1,48 @@
+{
+  "name": "Green Patterns",
+  "short_name": "Green Patterns",
+  "start_url": "https://bniajfi.org/greenpatterns/beta",
+  "display": "standalone",
+  "background_color": "#30A0F0",
+  "theme_color": "#2090F0",
+  "description": "Green Patterns",
+  "dir":"rtl",
+  "lang":"ar",
+  "icons": [{
+    "src": "./images/GreenPatterns16.ico",
+    "sizes": "16x16",
+    "type": "image/ico"
+  }, {
+    "src": "./images/GreenPatterns24.ico",
+    "sizes": "24x24",
+    "type": "image/ico"
+  }, {
+    "src": "./images/GreenPatterns32.ico",
+    "sizes": "32x32",
+    "type": "image/ico"
+  }, {
+    "src": "./images/GreenPatterns64.ico",
+    "sizes": "64x64",
+    "type": "image/ico"
+  }, {
+    "src": "./images/GreenPatterns144.png",
+    "sizes": "144x144",
+    "type": "image/png"
+  }, {  
+    "src": "/images/GreenPatterns192.png",  
+    "sizes": "192x192",  
+    "type": "image/png"  
+  }, {  
+    "src": "/images/GreenPatterns256.png",  
+    "sizes": "256x256",  
+    "type": "image/png"  
+  }, {  
+    "src": "/images/GreenPatterns384.png",  
+    "sizes": "384x384",  
+    "type": "image/png"  
+  }, {  
+    "src": "/images/GreenPatterns512.png",  
+    "sizes": "512x512",  
+    "type": "image/png"  
+  }]
+}

@@ -1,0 +1,55 @@
+/*
+  _    _ ______          _____  ______ _____  
+ | |  | |  ____|   /\   |  __ \|  ____|  __ \ 
+ | |__| | |__     /  \  | |  | | |__  | |__) |
+ |  __  |  __|   / /\ \ | |  | |  __| |  _  / 
+ | |  | | |____ / ____ \| |__| | |____| | \ \ 
+ |_|  |_|______/_/    \_\_____/|______|_|  \_\
+
+*/
+#modal_Welcome {
+  display:block
+}
+/* Big Screens */
+@media all and (min-width: 801px) {
+  #toggle_header_menu { display: none; }  
+  header{ height: 85px; }
+  #header_menu{  display: flex; }
+
+}
+/* Small Screens */
+@media all and (max-width: 801px) {
+  #header_menu{  display: none; }
+}
+#header_menu {
+  flex: 100%;
+  height : 35px;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
+  overflow: hidden;
+  padding: auto;
+}
+
+header figure{
+  margin: auto;
+  font-size : var(--header-figure_font-size);
+  font-weight: var(--header-figure_font-weight);
+  width : auto
+}
+header figure img{
+  width : auto
+}
+header menu button{
+  padding: .25rem;
+  color: var(--header-menu-button_color);
+  font-size : var(--header-menu-button_font-size);
+}
+#toggle_header_menu{ font-size : var(--toggle_header_menu_font-size); }
+
+.toggle_nav{
+  font-size : var(--toggle_nav_font-size);
+  height:100%;
+}
+nav .dropdown_content{ z-index: 3;}
+
+nav{ height:50px; }

@@ -1,0 +1,259 @@
+
+/*
+  ____                     _    _____                      _         
+ |  _ \                   | |  / ____|                    | |        
+ | |_) |_ __ ___  __ _  __| | | |     _ __ _   _ _ __ ___ | |__  ___ 
+ |  _ <| '__/ _ \/ _` |/ _` | | |    | '__| | | | '_ ` _ \| '_ \/ __|
+ | |_) | | |  __/ (_| | (_| | | |____| |  | |_| | | | | | | |_) \__ \
+ |____/|_|  \___|\__,_|\__,_|  \_____|_|   \__,_|_| |_| |_|_.__/|___/
+*/
+
+.breadcrumb::after {
+    display: 					block;
+    content: 					"";
+    clear: 						both
+}
+.breadcrumb-item {
+    float: 						left
+}
+.breadcrumb-item+.breadcrumb-item::before {
+    display: 					inline-block;
+    padding-right: 				.5rem;
+    padding-left: 				.5rem;
+    content:					"/"
+}
+.breadcrumb-item+.breadcrumb-item:hover::before {
+    text-decoration: 			var(--text-decoration);
+}
+.breadcrumb-item.active {
+    color: 						#636c72
+}
+.breadcrumb {
+    padding: 					.75rem 1rem;
+    margin-bottom: 				1rem;
+    list-style: 				none;
+    background-color:			var(--bgcolor4);
+}
+
+
+
+/*
+  _______    _     _           
+ |__   __|  | |   | |          
+    | | __ _| |__ | | ___  ___ 
+    | |/ _` | '_ \| |/ _ \/ __|
+    | | (_| | |_) | |  __/\__ \
+    |_|\__,_|_.__/|_|\___||___/
+*/
+
+.table {
+    width: 						100%;
+    max-width: 					100%;
+    margin-bottom: 				1rem
+}
+.table td,
+.table th {
+    padding: 					.75rem;
+    vertical-align: 			top;
+    border-top: 				1px solid #eceeef
+}
+.table thead th {
+    vertical-align: 			bottom;
+    border-bottom: 				2px solid #eceeef
+}
+.table tbody+tbody {
+    border-top: 				2px solid #eceeef
+}
+.table .table {
+    background-color: 			#fff
+}
+.table-sm td,
+.table-sm th {
+    padding: 					.3rem
+}
+.table-bordered {
+    border: 					1px solid #eceeef
+}
+.table-bordered td,
+.table-bordered th {
+    border: 					1px solid #eceeef
+}
+.table-bordered thead td,
+.table-bordered thead th {
+    border-bottom-width: 		2px
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: 			rgba(0, 0, 0, .05)
+}
+.table-hover tbody tr:hover {
+    background-color: 			rgba(0, 0, 0, .075)
+}
+
+
+ /*
+  ____                _             _____           _ _           
+ |  _ \              | |           |  __ \         | (_)          
+ | |_) | ___  _ __ __| | ___ _ __  | |__) |__ _  __| |_ _   _ ___ 
+ |  _ < / _ \| '__/ _` |/ _ \ '__| |  _  // _` |/ _` | | | | / __|
+ | |_) | (_) | | | (_| |  __/ |    | | \ \ (_| | (_| | | |_| \__ \
+ |____/ \___/|_|  \__,_|\___|_|    |_|  \_\__,_|\__,_|_|\__,_|___/
+*/
+.rounded {
+    border-radius: 				.25rem
+}
+.rounded-top {
+    border-top-right-radius: 	.25rem;
+    border-top-left-radius: 	.25rem
+}
+.rounded-right {
+    border-bottom-right-radius: .25rem;
+    border-top-right-radius: 	.25rem
+}
+.rounded-bottom {
+    border-bottom-right-radius: .25rem;
+    border-bottom-left-radius: 	.25rem
+}
+.rounded-left {
+    border-bottom-left-radius: 	.25rem;
+    border-top-left-radius: 	.25rem
+}
+.rounded-circle {
+    border-radius: 				50%
+}
+.rounded-0 {
+    border-radius: 				0
+}
+.clearfix::after {
+    display: 					block;
+    content: 					"";
+    clear: 						both
+}
+
+
+/*
+   _____                 _       _   ________   __
+  / ____|               (_)     | | |  ____\ \ / /
+ | (___  _ __   ___  ___ _  __ _| | | |__   \ V / 
+  \___ \| '_ \ / _ \/ __| |/ _` | | |  __|   > <  
+  ____) | |_) |  __/ (__| | (_| | | | |     / . \ 
+ |_____/| .__/ \___|\___|_|\__,_|_| |_|    /_/ \_\
+        | |                                       
+        |_|                                       
+*/
+
+small, .small {	font-size:			70%		}
+.sub, sub {   	bottom:				-.25em	}
+.sup, sup {		top:					-.5em	}
+.sub, sub, .sup, sup {
+    font-size:						75%;
+    line-height:					0;
+    position:						relative;
+    vertical-align:					baseline
+}
+
+
+.blur:hover {		filter: blur(4px);}
+.brightness:hover {	filter: brightness(0.30);}
+.contrast:hover {	filter: contrast(180%);}
+.grayscale:hover {	filter: grayscale(100%);}
+.huerotate:hover {	filter: hue-rotate(180deg);}
+.invert:hover {		filter: invert(100%);}
+.opacity:hover {	filter: opacity(50%);}
+.saturate:hover {	filter: saturate(7);}
+.sepia:hover {		filter: sepia(100%);}
+.shadow:hover {		filter: drop-shadow(8px 8px 10px green);}
+
+/* 
+ * Text FX
+*/
+.rainbow { animation: rainbow 5s infinite; }
+@keyframes rainbow{
+	0%{		color: var(--rainbow-1);}
+	20%{	color: var(--rainbow-2);}
+	30%{	color: var(--rainbow-3);}
+	40%{	color: var(--rainbow-4);}
+	50%{	color: var(--rainbow-5);}
+	60%{	color: var(--rainbow-4);}
+	70%{	color: var(--rainbow-3);}
+	80%{	color: var(--rainbow-2);}
+	100%{	color: var(--rainbow-1);}
+}
+.lead {
+    font-size: 			1.25rem;
+    font-weight: 		300
+}
+.small,
+small {
+    font-size: 			80%;
+    font-weight: 		400
+}
+.mark,
+mark {
+    padding: 			.2em;
+    background-color: 	#fcf8e3
+}
+
+/* Block Quotes */
+.blockquote {
+    padding: 			.5rem 1rem;
+    margin-bottom: 		1rem;
+    font-size: 			1.25rem;
+    border-left: 		.25rem solid #eceeef
+}
+.blockquote-footer {
+    display: 			block;
+    font-size: 			80%;
+    color: 				#636c72
+}
+.blockquote-footer::before {
+    content: 			"\2014 \00A0"
+}
+.blockquote-reverse {
+    padding-right: 		1rem;
+    padding-left: 		0;
+    text-align: 		right;
+    border-right: 		.25rem solid #eceeef;
+    border-left: 		0
+}
+.blockquote-reverse .blockquote-footer::before {
+    content: 			""
+}
+.blockquote-reverse .blockquote-footer::after {
+    content: 			"\00A0 \2014"
+}
+
+/*	Images */
+.img-fluid {
+    max-width: 			100%;
+    height: 			auto
+}
+.img-thumbnail {
+    padding: 			.25rem;
+    background-color: 	#fff;
+    border: 			1px solid #ddd;
+    border-radius: 		.25rem;
+    -webkit-transition:	all .2s ease-in-out;
+    -o-transition: 		all .2s ease-in-out;
+    transition: 		all .2s ease-in-out;
+    max-width: 			100%;
+    height: 			auto
+}
+.logo{
+	width:				var(--width-logo);
+	height:				var(--height-logo);
+}
+
+/* 
+ * Figures
+*/
+.figure {
+    display: 			inline-block
+}
+.figure-img { 
+	margin-bottom:		5rem;
+    line-height:		1;
+}
+.figure-caption {
+    font-size:			90%;
+    color:				#636c72
+}

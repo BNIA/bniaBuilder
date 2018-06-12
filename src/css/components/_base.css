@@ -1,0 +1,127 @@
+/* 
+  ____   ____  _      _____  
+ |  _ \ / __ \| |    |  __ \ 
+ | |_) | |  | | |    | |  | |
+ |  _ <| |  | | |    | |  | |
+ | |_) | |__| | |____| |__| |
+ |____/ \____/|______|_____/
+ * 
+ * Before we Begin: 
+ * Fix Default Properties here
+ *
+ */
+
+::-webkit-scrollbar-button { background-color: var(--scrollbar-button_background-color); }
+::-webkit-scrollbar-thumb {  background-color: var(--scrollbar-thumb_background-color); }
+::-webkit-scrollbar {  background-color:var(--scrollbar_background-color); }
+@media all and (max-width: 800px) { ::-webkit-scrollbar {  width:20px;  } }
+@media all and (min-width: 801px) { ::-webkit-scrollbar {  width:8px; } }
+@media all and (max-device-width: 801px) { 
+  ::-webkit-scrollbar-button { display: none; }
+  ::-webkit-scrollbar-thumb { display: none; }
+  ::-webkit-scrollbar { display: none; } 
+}
+ 
+p {margin: 0}
+h1,h2,h3,h4,h5,h6 {
+    font-weight: 600;
+    margin: 0
+}
+h1 { font-size: 2em; line-height: 1.25;}
+h2 { font-size: 1.625em; line-height: 1.15384615;}
+h3 { font-size: 1.375em; line-height: 1.13636364;}
+h4 { font-size: 1.125em; line-height: 1.11111111;}
+@media (min-width: 43.75em) {
+  h1 { font-size: 2.5em; line-height: 1.125; }
+  h2 { font-size: 2em; line-height: 1.25; }
+  h3 { font-size: 1.5em; line-height: 1.25; }
+  h4 { line-height: 1.22222222; }
+}
+@media (min-width: 56.25em) {
+  h1 { font-size: 3em; line-height: 1.05; }
+  h2 { font-size: 2.25em; line-height: 1.25; }  
+  h3 { font-size: 1.75em; line-height: 1.25; }
+}
+
+/* INPUTS, IMAGES, LISTS */
+input[type=checkbox]:disabled,
+input[type=radio]:disabled {
+    cursor: not-allowed
+}
+select, input{ 
+  width: calc(100% - 20px);
+  font-size: calc( var(--details-font_size) );
+  margin-top: .25em;
+  margin-bottom: .25em;
+}
+input:active, input:hover, input:focus,
+select:active, select:hover, select:focus{
+  font-size: calc( var(--details-font_size) + .4em);
+  color: var(--a-hover-focus_color);
+  margin-top: .05em;
+  margin-bottom: .05em;
+}
+input:disabled, select:disabled {
+    cursor: not-allowed
+}
+input[type=date],input[type=time],
+input[type=datetime-local],
+input[type=month] {-webkit-appearance: listbox }
+input[type=search] { -webkit-appearance: none;}
+label{
+    margin-top: 5px;
+    display: block;
+}
+figure{ margin:0px;}
+img {
+    border-style: none;
+    vertical-align: middle;
+}
+li { display: inline-block; }
+a:link { text-decoration: none; }
+.sticky {
+    position: -webkit-sticky;
+    position: sticky;
+}
+hr {
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box;
+    height: 0;
+    margin-bottom: 1rem;
+    border: 0;
+    border-top: var(--hr_border-top);
+}
+ul, menu, dir {
+    margin: 0;
+    padding: 0;
+}
+[hidden] { display: none!important; }
+#mapid:focus{border: none;}
+.leaflet-bar a.leaflet-disabled{ color: black;}
+#mapid{
+  cursor: grab;
+  z-index: 0; height: 100% !important; }
+.legendContainer{
+  padding:10px;
+}
+ul, li{ margin:0; padding:0;}
+
+*:focus{ border: var(--all-focus_border); }
+button:hover, a:hover{ background-color: var(--a_button-hover_background-color);}
+button:focus, a:focus{ background-color: var(--a_button-focus_background-color);}
+button:active, a:active{ background-color: var(--a_button-active_background-color);}
+
+a, button{
+  cursor: pointer; 
+  border: none; 
+  outline: none;
+  background: none;
+  color: var(--a_button_color);
+}
+button:hover, button:focus,
+a:hover, a:focus{ 
+  font-weight: 700;
+  color: var(--a-hover-focus_color);
+}
+
+section { display:inline-block}

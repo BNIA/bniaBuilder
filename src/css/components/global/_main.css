@@ -1,0 +1,39 @@
+/*
+__  __          _____ _   _  
+|  \/  |   /\   |_   _| \ | | 
+| \  / |  /  \    | | |  \| | 
+| |\/| | / /\ \   | | | . ` | 
+| |  | |/ ____ \ _| |_| |\  | 
+|_|  |_/_/    \_\_____|_| \_|
+*/
+
+main > section{
+  min-width: 200px;
+  max-width: auto;
+  width: 100%;
+  display:inline;
+  background: var(--main-section_background);
+}
+aside {
+  padding-top:2px;
+  width: 370px;
+  resize: horizontal;
+  overflow: hidden;
+  display:flex;
+  flex-direction: column;
+}
+
+#navigation_drawer section{
+  overflow: auto;
+}
+
+#context_drawer section{
+  overflow:auto;
+  height: 100%;
+  width: 100%;
+}
+aside article {
+  text-align: left;
+  width: 100%;
+  margin:auto;
+}

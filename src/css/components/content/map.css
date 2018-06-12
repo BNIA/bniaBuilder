@@ -1,0 +1,37 @@
+/* Map */
+
+.legendContainer{
+  background-color: white;
+}
+
+.leaflet-tooltip {
+  background-color: rgba(255, 255, 255, .5);
+  font-size : 1rem;
+}
+
+
+/* Geocoder Suggestions and Input */
+div.geocoder-control-suggestions.leaflet-bar{ display : none; }
+input.geocoder-control-input.leaflet-bar{ width : 30px; height: 30px; margin: 0px !important; }
+input.geocoder-control-input.leaflet-bar:focus{  width : 100%; padding-left: 30px; }
+input.geocoder-control-input.leaflet-bar:hover{ background-color: #f4f4f4; }
+
+/* Geocoder Container / Font Awesome Icon */
+div.geocoder-control.leaflet-control {
+  background-color: white; 
+}
+div.geocoder-control.leaflet-control:hover > input.geocoder-control-input.leaflet-bar,
+div.geocoder-control.leaflet-control:hover {
+  background-color: #f4f4f4; 
+}
+
+div.geocoder-control.leaflet-control:before {
+  content: "\f002";
+  color:black;
+  background-color : rgba( 255,255,255,0);
+  font-family: FontAwesome;
+  position: absolute;
+  font-size: 16px;
+  left: 10px;
+  top : 5px;
+}

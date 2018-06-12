@@ -1,0 +1,208 @@
+/*
+               _     _      
+     /\       (_)   | |     
+    /  \   ___ _  __| | ___ 
+   / /\ \ / __| |/ _` |/ _ \
+  / ____ \\__ \ | (_| |  __/
+ /_/    \_\___/_|\__,_|\___|
+*/
+
+/* 
+* Postion
+*/
+
+#context_drawer{z-index:1;}
+#navigation_drawer{z-index:2;}
+/* 
+* Responsive
+*/
+@media all and (max-width: 800px) {
+  aside {
+    z-index: 3;
+	position:absolute;
+    bottom:0px;
+    top: 50px;
+    height: stretch-content;
+  }
+  aside, .view_2{ display:none; }
+  #navigation_drawer{ left:0px;  display:none;}
+  #context_drawer{ right: 0;  display:none;}
+}
+@media all and (max-width: 599px) {
+  .hidden-sm-down { display:none!important }
+  aside { width: 100vw; }
+}
+@media all and (max-device-width: 801px) {
+  aside { border: none; }
+  #context_drawer { display:none; }
+  #navigation_drawer{ display:none; }
+}
+@media all and (min-width: 801px) {
+  #context_drawer, .view_2{ display:none; }
+  #navigation_drawer{
+    height: 100%;
+    border-right: var(--big-context_drawer_border-right);
+  }
+  #context_drawer{
+    top: 85px;
+    right: 0;
+    bottom: 0px;
+    position:absolute;
+    border: var(--big-context_drawer_border);
+    box-shadow: -5px -10px rgba(0,0,0,.1);
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+  }
+}
+
+section.view_2 { overflow: auto }
+
+
+
+
+/* 
+* Buttons
+*/
+.DescButton, .GoButton, .removeButton{
+  float:right;
+}.searchButton{
+  padding:5px;
+  font-size:20px;
+}
+.fa:active, .DescButton:active, .GoButton:active, .searchButton{
+  background-color: var(--scrollbar-thumb_background-color)
+}
+.fa:hover, .DescButton:hover, .GoButton:hover, .searchButton:hover{
+  background-color: var(--bg-color-1);
+}
+.fa:active, .DescButton:active, .GoButton:active, .searchButton:active{
+  background-color: var(--bg-color-2);
+}
+.fa:focus, .DescButton:focus, .GoButton:focus, .searchButton:focus{
+  background-color: var(--bg-color-2);
+}
+
+
+section .toggle_context_drawer{
+  display: none;
+  position: absolute; 
+  z-index:5;
+  right: 0;
+  padding: 10px; 
+  background-color: var(--section_background-color);
+
+}
+
+#toggle_view, .close_modal {
+  min-height:50px;
+  padding: 5px 10px;
+  margin: 5px auto;
+  font-size: var(--aside-show-button);
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 15px;
+  color: var(--filter_toggleView_closeModal_color);
+  background: var(--filter_toggleView_background);
+  border :  var(--filter_toggleView_closeModal_border);
+  box-shadow: var(--filter_toggleView_closeModal_box-shadow);
+}
+#filter:hover, #filter:focus,
+#close_modal:hover, .close_modal:focus,
+#toggle_view:hover, #toggle_view:focus{
+  color: var(--hover_focus_color);
+  box-shadow: var(--hover_focus_box-shadow);
+}
+#filter:active, #toggle_view:active, .close_modal:active{
+  color: var(--active_color);
+  border :  var(--active_border);
+  background-color: var(--active_background-color);
+  box-shadow: var(--active_box-shadow);
+}
+
+/*
+   _____                                            
+  / ____|                                           
+ | (___  _   _ _ __ ___  _ __ ___   __ _ _ __ _   _ 
+  \___ \| | | | '_ ` _ \| '_ ` _ \ / _` | '__| | | |
+  ____) | |_| | | | | | | | | | | | (_| | |  | |_| |
+ |_____/ \__,_|_| |_| |_|_| |_| |_|\__,_|_|   \__, |
+                                               __/ |
+                                              |___/ 
+// Defines Look of Summary Dropdowns
+  line-height:1.5rem;
+*/
+summary{
+  font-weight: 400;
+  text-align: left;
+  font-size: var(--summary-font_size);
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: pointer;
+}
+summary:hover{ 
+  font-weight: 500; 
+}
+details{
+  font-size: var(--details-font_size);
+  padding: 0px;
+  padding-top: 3px;
+}
+details ul{
+  padding-left: 10px;
+}
+details li {
+  text-align: left;
+  display :	block;
+  font-weight: 600;
+}
+
+section > details[open]> summary:focus,
+section > details[open]> summary:hover,
+section > details[open]> summary{
+  border: var(--section_details_summary_open_border)
+}
+
+section > details> summary:focus,
+section > details> summary:hover,
+section > details> summary{
+  border: var(--section_details_summary_closed_border)
+}
+
+aside{ background-color: var(--aside_background-color); }
+aside > section {
+  min-height : 250px;
+}
+
+/* Details Layer 3 */
+section > details > details > details > summary{
+  background-color: var(--section_details_details_details_summary_background-color);
+  position: sticky;
+  top: 72px;
+  z-index:1;
+}
+section > details > details > details{
+  padding-bottom: 2px;
+  margin-left:15px;
+}
+
+/* Details Layer 2 */
+section > details > details > summary{
+  background-color: var(--section_details_details_summary_background-color);
+  position: sticky;
+  top: 30px;
+  z-index:2;
+}
+section > details > details{}
+
+/* Details Layer 1 */
+section > details > summary::-webkit-details-marker { display: none; }
+section > details > summary:hover{ color: var(--section_details_summary_hover_color); }
+section > details > summary{
+  position: sticky;
+  top: 0px;
+  z-index:3;
+  background-color: var(--section_details_summary_background-color);
+  line-height: var(--section_details_summary_line-height);
+}
+section > details{background-color: var(--section_details_background-color);}

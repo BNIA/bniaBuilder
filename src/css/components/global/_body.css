@@ -1,0 +1,66 @@
+/*
+   _____ _      ____  ____          _       _____ 
+  / ____| |    / __ \|  _ \   /\   | |     / ____|
+ | |  __| |   | |  | | |_) | /  \  | |    | (___  
+ | | |_ | |   | |  | |  _ < / /\ \ | |     \___ \ 
+ | |__| | |___| |__| | |_) / ____ \| |____ ____) |
+  \_____|______\____/|____/_/    \_\______|_____/ 
+ * Define the Major Sections
+ * Most Important Here is the FlexBox 
+*/
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-weight: bold;
+  text-align: center;
+  margin:0; padding:0;
+  overflow-x: hidden;
+}
+body {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+#react-mount { height: 100% }
+#react-mount > div { 
+  height: 100%;
+  display: flex;
+  flex-direction: column; 
+  justify-content: flex-start; 
+  flex-wrap: wrap; 
+  overflow:hidden;
+  
+    background: var(--body_background);
+    color: var(--body_color);
+    font-size: var(--body_font-size);
+    font-family: var(--body_font-family);
+    font-weight: var(--body_font-weight);
+    line-height: var(--body_line-height);
+    letter-spacing: var(--body_letter-spacing);
+}
+#header_menu{ 
+  background: var(--header_menu_background);
+}
+header{ 
+  width: 100%;
+  z-index: 5;
+  background-color: var(--header_background-color);  
+  flex: 0 1 auto;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+main { 
+  flex: 1 1;
+  display: flex;
+  width: 100%;
+  overflow:hidden;
+}
+footer{ 
+  z-index: 1;
+  background: rgba(15, 137, 224, 1);
+  flex: 0 1 auto;
+  padding: 1rem;
+}

@@ -1,0 +1,43 @@
+/* 
+ *
+ * Big Browser Window 
+ *
+*/
+@media all and (min-width: 801px) { .hidden-md-up { display:none!important } }
+@media all and (min-width: 601px) { .hidden-sm-up { display:none!important } }
+/* 
+ *
+ * Small Browser Window 
+ *
+*/
+@media all and (max-width: 800px) { .hidden-md-down { display:none!important } }
+@media all and (max-width: 600px) { .hidden-sm-up { display:none!important } }
+/* 
+ *
+ * Phones Specifically
+ *
+*/
+@media all and (max-width: 599px) { }
+/* 
+ *
+ * Phones And Ipads Specifically 
+ *
+*/
+@media all and (max-device-width: 800px) { }
+/* 
+ *
+ * Desktops Specifically 
+ *
+*/
+@media all and (min-device-width: 801px) { }
+/* 
+ *
+ * Browser Window Ranges : First Phones then Ipads then laptops then Desktops then TVs
+ * 
+ *
+*/
+@media only screen and (min-width: 480px) and (max-width: 599px) { }
+@media only screen and (min-width: 600px) and (max-width: 800px) { }
+@media only screen and (min-width: 801px) and (max-width: 1024px) { }
+@media only screen and (min-width: 1025px) and (max-width: 1280px) { }
+@media only screen and (min-width: 1281px){ }

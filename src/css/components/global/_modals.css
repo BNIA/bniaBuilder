@@ -1,0 +1,66 @@
+/*
+  __  __  ____  _____          _       _____ 
+ |  \/  |/ __ \|  __ \   /\   | |     / ____|
+ | \  / | |  | | |  | | /  \  | |    | (___  
+ | |\/| | |  | | |  | |/ /\ \ | |     \___ \ 
+ | |  | | |__| | |__| / ____ \| |____ ____) |
+ |_|  |_|\____/|_____/_/    \_\______|_____/ 
+*/ 
+
+.modal_wrapper {
+  position: fixed;
+  z-index: 10;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0 , 0 , 0 ,0.4);
+}
+.modal_content {
+  margin: auto;
+  margin-top:15%;
+  width: 90%;
+  max-width: 700px;
+  border: var(--modal_container_border);
+  background-color: var(--modal_container_background-color);
+  box-shadow: var(--modal_container_box-shadow);
+}
+
+.modal_content{ display:none; }
+.modal_content h2{ background-color : var(--modal_content-h2_background-color) }
+.modal_content p{ padding:10px; }
+
+.modal_big_wrapper {
+  position: fixed;
+  z-index: 10;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0 , 0 , 0 ,0.4);
+}
+.modal_big_content {
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin:auto;
+  width: 85%;
+  max-width: 1250px;
+  height: 95%;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.modal_content section h3{
+  top: 40px; 
+  position: sticky; 
+  background: var(--modal_content-section-h3_background)
+}
+
+.modal_big_content > details > img {
+  width: 50%;
+  max-width: 350px;
+  margin: auto;
+}
+.modal_big_content {
+  overflow : auto;
+  padding : 10px;
+}
