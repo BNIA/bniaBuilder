@@ -208,8 +208,7 @@ export async function showDetails( feature, state ){
   }
 }
 
-// Used to retrieve data for the showDetails function -> showDetails
-// This function exhibits redundancy with other methods. Refract it out of existance!
+// Used to retrieve data for the showDetails function
 async function queryForData( dictionary, props, featuresDictionary){
   let newData = dictionary;
   // Perform a Query for clickedParcelData, append it to the dictionary
@@ -220,31 +219,47 @@ async function queryForData( dictionary, props, featuresDictionary){
   let layerName = dictionary.layer ? dictionary.layer : 'false';
   let fetch = '';
   if (dictionary.host == 'bniaApi') {
+    // Get to the layer
     let queryString = 'https://charleskarpati.com/api?' 
       + 'database' + '=' + provider.toString().replace(/ /g, "%20") + '&' 
       + 'table' + '=' + layerName.toString().replace(/ /g, "%20") + '&' 
       + 'fields' + '=block_lot&' 
       + 'fieldsVals' + '=' + blocklot.replace(/ /g, "%20")
       + '&' + 'purpose' + '=' + 'display';
+    // perform the query
     fetch = fetchData(queryString)
     console.log('show Bnia Details : ' + queryString);
     newData.clickedParcelData = await fetch;
     return newData;
   }
   if (dictionary.host == 'arcgis') {
+    // url to our layer
+    let queryString = '';
+    let ending = '&returnGeometry=false' + '&outFields=*' + '&f=pjson';
     let root = 'https://services1.arcgis.com/' + provider.replace(/ /g, "%20") + 
       '/ArcGIS/rest/services/' + service.replace(/ /g, "%20") +
       '/FeatureServer/'+layerName.replace(/ /g, "%20")+
       '/query?';
-    let queryString = root + 'where=1=1';
-    if( props.NAME && props.NAME != ' ' ){ queryString = root + "where=NAME+like%27%25"+props.NAME.replace(/ /g, "%20")+'%25%27'; }
-    else if( props.ADDRESS && props.ADDRESS != ' ' ){ queryString = root + "where=ADDRESS+like%27%25"+props.ADDRESS.replace(/ /g, "%20")+'%25%27'; }
-    queryString = queryString + '&returnGeometry=false';
-    queryString = queryString + '&outFields=*';
-    queryString = queryString + '&f=pjson';
+    if( (props.NAME) && props.NAME != ' ' ){ 
+      queryString = root + "where=NAME+like%27%25"+props.NAME.replace(/ /g, "%20")+'%25%27'; 
+    }
+    if( (props.Name) && props.Name != ' ' ){ 
+      queryString = root + "where=Name+like%27%25"+props.Name.replace(/ /g, "%20")+'%25%27'; 
+    }
+    else if( props.ADDRESS && props.ADDRESS != ' ' ){ 
+      queryString = root + "where=ADDRESS+like%27%25"+props.ADDRESS.replace(/ /g, "%20")+'%25%27'; 
+    }
+    else {
+      queryString = root + 'where=1=1' 
+    }
+    // final Query Specifications
+    queryString = queryString + ending 
     console.log('Show ArcGis Details : ' + queryString);
     let fetch = await fetchData(queryString)
     newData.clickedParcelData = fetch.features;
     return newData
   }
 }
+
+// CHECK FOR BL
+// IF BL EXISTS THEN DO THE SEARCH BY BLOCKLOT

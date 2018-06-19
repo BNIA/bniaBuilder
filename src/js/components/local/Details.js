@@ -15,7 +15,6 @@ export default class Details extends Component {
     const { layer, state, stateFunctions} = this.props;
     //  Create the form
     let formStuff = constructFormStuff(layer, stateFunctions);
-
     // Check if the layer already contains data. If so. Grab it.
     let removeButton = state.records ? true : false;
     removeButton = !state.records ? false : state.records[layer.host + '&' + layer.service + '&' + layer.layer];

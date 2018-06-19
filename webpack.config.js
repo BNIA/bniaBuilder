@@ -5,6 +5,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 const WorkboxPlugin = require('workbox-webpack-plugin');
+const WebpackMonitor = require('webpack-monitor');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 //var glob = require("glob");//folder: glob.sync("./src/js/utils/*.js")
 module.exports = env => {
@@ -59,12 +61,16 @@ module.exports = env => {
     new CleanWebpackPlugin(['dist']),
     new HtmlWebPackPlugin({
       template: "./src/index.html",
-      filename: "./index.html",
-      title: 'Progressive Web Application'
+      filename: "./index.html"
     }),
     new MiniCssExtractPlugin({
       filename: "[name].css",
       chunkFilename: "[id].css"
+    }),
+    new BundleAnalyzerPlugin(),
+    new WebpackMonitor({
+      launch: true,
+      port: 8889
     }),
     new CopyWebpackPlugin([
       { from: './src/json_config.json', to: 'json_config.json', toType: 'file' },
@@ -76,9 +82,14 @@ module.exports = env => {
     })
   ],
   output: {
-    filename: '[name].js',
+    filename: '[name].[hash].js',
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
   }
-  }
+}
 };
 /*      {
         test: /\.css$/,

@@ -1,47 +1,43 @@
 {
-  "name": "Green Patterns",
-  "short_name": "Green Patterns",
-  "start_url": "https://bniajfi.org/greenpatterns/beta",
+  "name": "Baltimore Open Land Data",
+  "short_name": "BOLD",
+  "start_url": "https://bniajfi.org/bold/",
   "display": "standalone",
   "background_color": "#30A0F0",
   "theme_color": "#2090F0",
-  "description": "Green Patterns",
+  "description": "Baltimore Open Land Data",
   "dir":"rtl",
   "lang":"ar",
   "icons": [{
-    "src": "./images/GreenPatterns16.ico",
+    "src": "./images/Bold16.ico",
     "sizes": "16x16",
     "type": "image/ico"
   }, {
-    "src": "./images/GreenPatterns24.ico",
-    "sizes": "24x24",
-    "type": "image/ico"
-  }, {
-    "src": "./images/GreenPatterns32.ico",
+    "src": "./images/Bold32.jpg",
     "sizes": "32x32",
     "type": "image/ico"
   }, {
-    "src": "./images/GreenPatterns64.ico",
+    "src": "./images/Bold64.jpg",
     "sizes": "64x64",
     "type": "image/ico"
   }, {
-    "src": "./images/GreenPatterns144.png",
+    "src": "./images/Bold144.jpg",
     "sizes": "144x144",
     "type": "image/png"
   }, {  
-    "src": "/images/GreenPatterns192.png",  
+    "src": "/images/Bold192.png",  
     "sizes": "192x192",  
     "type": "image/png"  
   }, {  
-    "src": "/images/GreenPatterns256.png",  
+    "src": "/images/Bold256.png",  
     "sizes": "256x256",  
     "type": "image/png"  
   }, {  
-    "src": "/images/GreenPatterns384.png",  
+    "src": "/images/Bold384.png",  
     "sizes": "384x384",  
     "type": "image/png"  
   }, {  
-    "src": "/images/GreenPatterns512.png",  
+    "src": "/images/Bold512.png",  
     "sizes": "512x512",  
     "type": "image/png"  
   }]

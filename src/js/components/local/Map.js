@@ -51,6 +51,7 @@ export default class Map extends Component {
     });  map.addControl(new overlayLegend());
 
     // Create Search Control
+    /*
     var searchControl = geocoding.geosearch({
         allowMultipleResults: true,
         placeholder: 'Enter an Address',
@@ -70,12 +71,12 @@ export default class Map extends Component {
                 }
             })]
     }).addTo(map);
-    
+    */
     // Utility
     function milesToMeters(miles) { return miles * 1069; };
     function removeRadius() { map.removeLayer(circle); };
     function removeRadiusMarker() { map.removeLayer(circle); map.removeLayer(marker); };
-
+/*
     // Search Control Events
     searchControl.on('results', function(data) {
         if (!map.hasLayer(marker)) { circle.addTo(map); marker.addTo(map); }
@@ -96,8 +97,8 @@ export default class Map extends Component {
         document.getElementById("removeRadius").addEventListener("click", removeRadius);
         document.getElementById("removeRadiusMarker").addEventListener("click", removeRadiusMarker);
     });
+    */
   }
-  
   // ComponentDidUpdate will handle changes to our layers
   async componentDidUpdate(prevProps, prevState) {
     let records = this.props.state.records;

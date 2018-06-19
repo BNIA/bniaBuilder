@@ -6,8 +6,8 @@
 > Construct websites to explore and visualize your data.
 
 ## Table of Contents
-**[About](#About)**<br>
-**[Requirements](#Requirements)**<br>
+**[About](#about)**<br>
+**[Requirements](#requirements)**<br>
 **[Installation](#installation)**<br>
 **[Setup](#setup)**<br>
 **[Usage](#usage)**<br>

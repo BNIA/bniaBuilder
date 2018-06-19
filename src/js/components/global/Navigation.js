@@ -20,7 +20,7 @@ export default class Navigation extends Component {
     let controller = sortDictionaries(dictionaries).map( function(group, i){
       // Layer Stands Alone
       if (group.length == 1 && group[0].length == 1) { 
-        return ( < Details  key={i} layer = { group[0][0] } stateFunctions= { stateFunctions } /> 
+        return ( < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
       ) }
       // Multiple Layers in Group
       let detailContent = group.map(function(subgroup, i){

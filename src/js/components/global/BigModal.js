@@ -3,7 +3,7 @@ const e = React.createElement;
 import ReactDisqus from 'react-disqus';
 import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
 
-export default class Modal extends Component {
+export default class BigModal extends Component {
   displayName: 'Modal';
   constructor(props) {
     super(props);
@@ -28,9 +28,9 @@ export default class Modal extends Component {
   async rotateView(rotateBy) { this.setState({ heading : this.state.heading + rotateBy }) }
 
   render() {
-  	console.log('loadingbigmodal');
     const { state } = this.props;
     if(!state.records){ return null}
+  	console.log('loadingbigmodal');
     // Style
     let styleBtn = { width: '50px', height: '50px', border: '1px solid black', margin: '5px', borderRadius: '5px' }
     // Details
@@ -50,9 +50,7 @@ export default class Modal extends Component {
       let streetViewApiKey = "&fov=100&heading=" + this.state.heading + "&pitch=10&key=AIzaSyBwEaG4Uj2rUeM5sjHPUobnUPQz_jHuq9s";
       let streetViewApiURL = "https://maps.googleapis.com/maps/api/streetview?size=800x600&location=";
       googleStreetViewSrc = streetViewApiURL + lat + "," + lng + streetViewApiKey;
-	  console.log(state.featuresDictionary);
-	  console.log(state.feature.properties);
-	  console.log(state.featuresConnectedDictionaries);
+
       // Data
       featuresDictionary = state.featuresDictionary;
       featuresConnectedDictionaries = state.featuresConnectedDictionaries;
@@ -118,22 +116,30 @@ function addModalListeners(){
 
 // COMPONENT 
 const ClickedDetails = (dictionary, props) => {
+  console.log('clickedDetails dictionary and props');
+  console.log(dictionary, props);
   let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
   let alias = dictionary.alias;
   
   let rightHand = dictionary.returnparcel;
+
   let pData = dictionary.clickedParcelData;
   // Sort Descending by 'YEAR'
   if(pData.length > 1){ pData.sort(function(a, b) { return b.Year - a.Year; }); }
+  let styleClickedArticle = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }  
   // Loop through all our records
   let stackOfRecords = pData.map( (record, i) => {
+  	// Use only the first record for now if there exists more.
+  	console.log(record);
+  	record = record['attributes'] ? record['attributes'] : record;
+  	console.log(record);
   	// For each field
     let detail = Object.keys(record, i ).map( (key, i) => {
+    	console.log(key);
       // Fallback value if we have an error.
       let alias = key;
       // This is one columns values in the record of information
       let parcelData = record[key];
-
 	  // Find the Field Alias from our dictionary matching the Key of our new inbound data.
 	  let name = dictionary.fields.filter(field => {
 	  	return field.name.trim() == key.trim()
@@ -148,9 +154,8 @@ const ClickedDetails = (dictionary, props) => {
 		  < b > { alias } < /b> : { parcelData }
 		< /div>
 	  )
-    } )
-    let style = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
-    return <article key={ i } style={style} > { detail } </article>
+    } );
+    return <article key={ i } style={styleClickedArticle} > { detail } </article>
   } )
   return <div > {stackOfRecords} </div>
 };
@@ -174,6 +179,7 @@ const DetailsPane = (featuresDictionary, availableGroups, properties) => {
 // Display all the connected details from a connected dictionary
 const ConnectDetails = (clickedDictionary, dictionary, props) => {
   let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
+  let styleConnectedArticle = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
   let alias = dictionary.alias;
   let rightHand = dictionary.returnparcel;
   let detailedInfo = false;
@@ -206,8 +212,7 @@ const ConnectDetails = (clickedDictionary, dictionary, props) => {
 	      < /div>
 		)
       } )
-      let style = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
-      return <article key={ i } style={style} > { record } </article>
+      return <article key={ i } style={styleConnectedArticle} > { record } </article>
     } );
     return (
       <details key={i}> 

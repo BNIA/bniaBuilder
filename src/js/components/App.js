@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import Body from 'js/components/global/Body';
 import Header from 'js/components/global/Header';
 import Modal from 'js/components/global/Modal';
-import BigModal from 'js/components/global/BigModal';
+//import BigModal from 'js/components/global/BigModal';
 
 import {handleChange, handleSubmit, showDetails, handleReset} from 'js/utils/search'
 import * as myConfig from '../../json_config.json';
@@ -27,9 +27,6 @@ export default class App extends Component {
     let recordId = layer.host+'&'+layer.service+'&'+layer.layer;
     let newRecords = this.state.records;
     delete newRecords[recordId]
-    console.log('HEEEEYO');
-    console.log(this.state.records)
-    console.log(newRecords);
     this.setState({ records: newRecords });
   }
 
@@ -80,7 +77,13 @@ export default class App extends Component {
   }
 
   // Toggles Text to Speach
-  componentDidMount(){ this.state.configuration.speech ? ( require('js/utils/annyang.min.js') ) : null }
+  async componentDidMount(){
+    this.state.configuration.speech ? ( require('js/utils/annyang.min.js') ) : null 
+    let BigModal = this.state.configuration.speech ? false : await import('js/components/global/BigModal');
+    this.setState({
+      BigModal : BigModal.default
+    } )
+  }
 
   render () {
     // These functions are crucial for the app to work.
@@ -91,10 +94,12 @@ export default class App extends Component {
       reset : this.handleReset, 
       showDetails : this.showDetails
     };
-
+    
     // CSS Variables allow for dynamic Style and Theming.
     let merge = {...this.state.style, ...this.state.theme}
-    let bigModal = !this.state.configuration.showAllRecordsBtn ? '' : <BigModal state={this.state} />
+    
+    let bigModal = (!this.state.configuration.showAllRecordsBtn || !this.state.BigModal ) ? '' : <this.state.BigModal state={this.state} />;
+
     if (navigator.appName == 'Microsoft Internet Explorer' || !!(navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/))){ alert("Please dont use IE."); }
     return (
     <div style={merge}>
@@ -106,3 +111,8 @@ export default class App extends Component {
     );
   }
 }
+
+//import BigModal from 'js/components/global/BigModal';
+//   let bigModal = !this.state.configuration.showAllRecordsBtn ? '' : import()'js/components/global/BigModal').then(myModule => { console.log('damn'); console.log(myModule.default); });
+// <BigModal state={this.state} />
+   
