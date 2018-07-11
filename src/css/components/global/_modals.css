@@ -12,7 +12,7 @@
   z-index: 10;
   height: 100%;
   width: 100%;
-  background-color: rgba(0 , 0 , 0 ,0.4);
+  background-color: rgba(3 , 3 , 3 ,0.6);
 }
 .modal_content {
   margin: auto;
@@ -33,7 +33,7 @@
   z-index: 10;
   height: 100%;
   width: 100%;
-  background-color: rgba(0 , 0 , 0 ,0.4);
+  background-color: rgba(3 , 3 , 3 ,0.7);
 }
 .modal_big_content {
   position: fixed;

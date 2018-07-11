@@ -9,35 +9,35 @@
   "dir":"rtl",
   "lang":"ar",
   "icons": [{
-    "src": "./images/Bold16.ico",
+    "src": "./images/bold/Bold16.ico",
     "sizes": "16x16",
     "type": "image/ico"
   }, {
-    "src": "./images/Bold32.jpg",
+    "src": "./images/bold/Bold32.jpg",
     "sizes": "32x32",
     "type": "image/ico"
   }, {
-    "src": "./images/Bold64.jpg",
+    "src": "./images/bold/Bold64.jpg",
     "sizes": "64x64",
     "type": "image/ico"
   }, {
-    "src": "./images/Bold144.jpg",
+    "src": "./images/bold/Bold144.jpg",
     "sizes": "144x144",
     "type": "image/png"
   }, {  
-    "src": "/images/Bold192.png",  
+    "src": "/images/bold/Bold192.png",  
     "sizes": "192x192",  
     "type": "image/png"  
   }, {  
-    "src": "/images/Bold256.png",  
+    "src": "/images/bold/Bold256.png",  
     "sizes": "256x256",  
     "type": "image/png"  
   }, {  
-    "src": "/images/Bold384.png",  
+    "src": "/images/bold/Bold384.png",  
     "sizes": "384x384",  
     "type": "image/png"  
   }, {  
-    "src": "/images/Bold512.png",  
+    "src": "/images/bold/Bold512.png",  
     "sizes": "512x512",  
     "type": "image/png"  
   }]

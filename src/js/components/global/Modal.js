@@ -9,7 +9,7 @@ export default class Modal extends Component {
 
   // Add Modal Event Listeners after the component mounts
   componentDidMount() { addModalListeners()  }
-
+  shouldComponentUpdate(nextProps, nextState){ return false }
   render() {
     const { modal, appName } = this.props;
 	// Get all the modals
@@ -40,7 +40,8 @@ class ModalContent extends Component {
     // Create the Content
     let innerContents = properties.children.map(function(contentItem, i) {
 	  let style = (contentItem.properties && contentItem.properties.style) ? contentItem.properties.style : {};
-	  return ( e(contentItem.component, { key: i, style: style }, contentItem.children) )
+	  let href = (contentItem.properties && contentItem.properties.href) ? contentItem.properties.href : {};
+	  return ( e(contentItem.component, { key: i, style: style, href: href }, contentItem.children) )
 	})
 	// Create the Modal & Insert the Content
     return ( 
@@ -72,9 +73,8 @@ function addModalListeners(){
 	  for (var x = 0; x < modal_content_list.length; x++) {
 		modal_content_list[x].style.display = 'none'
 	  }
-	  console.log(this.title);
 	  // find the modal with the id matching the onClick elements title and diplay it.
-	  document.getElementById(this.title).style.display = 'block';
+	  document.getElementById(this.getAttribute('modalid')).style.display = 'block';
 	  document.getElementsByClassName('modal_wrapper')[0].style.display = "block"
 	})
   }

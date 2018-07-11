@@ -5,9 +5,26 @@
 }
 
 .leaflet-tooltip {
-  background-color: rgba(255, 255, 255, .5);
-  font-size : 1rem;
+  min-width: 200px;
+  max-width: 300px;
+  overflow : hidden;
+  text-overflow: ellipsis;
+
+  background: var(--bg-color-2);
+  color:#eee;
+  font-size:16px;
+  line-height:24px;
+
+
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:9px solid var(--bg-color-1);
 }
+
+
+
+
+
 
 
 /* Geocoder Suggestions and Input */

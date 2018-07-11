@@ -6,13 +6,13 @@
   / ____ \\__ \ | (_| |  __/
  /_/    \_\___/_|\__,_|\___|
 */
-
 /* 
 * Postion
 */
 
 #context_drawer{z-index:1;}
 #navigation_drawer{z-index:2;}
+#mainNav{padding:5px}
 /* 
 * Responsive
 */
@@ -50,8 +50,9 @@
     position:absolute;
     border: var(--big-context_drawer_border);
     box-shadow: -5px -10px rgba(0,0,0,.1);
-    border-top-left-radius: 25px;
-    border-bottom-left-radius: 25px;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    padding-bottom:12px;
   }
 }
 
@@ -83,17 +84,17 @@ section.view_2 { overflow: auto }
 }
 
 
-section .toggle_context_drawer{
+.toggle_context_drawer{
   display: none;
   position: absolute; 
-  z-index:5;
+  z-index:4;
   right: 0;
   padding: 10px; 
   background-color: var(--section_background-color);
-
 }
 
-#toggle_view, .close_modal {
+.toggle_view, .close_modal, .open_big_modal, .close_big_modal,
+#showall, .downloadall, .toggle_view{
   min-height:50px;
   padding: 5px 10px;
   margin: 5px auto;
@@ -106,20 +107,31 @@ section .toggle_context_drawer{
   background: var(--filter_toggleView_background);
   border :  var(--filter_toggleView_closeModal_border);
   box-shadow: var(--filter_toggleView_closeModal_box-shadow);
+
+  min-width:50px;
+  height: 50px; 
+  border: 1px solid black; 
+  margin: 5px; 
+  border-radius: 5px;
 }
+.downloadall{background:none}
+
+/* Put a better label on this */
+.close_big_modal:hover, .close_big_modal:focus,
+.open_big_modal:hover, .open_big_modal:focus,
 #filter:hover, #filter:focus,
 #close_modal:hover, .close_modal:focus,
-#toggle_view:hover, #toggle_view:focus{
+.toggle_view:hover, .toggle_view:focus{
   color: var(--hover_focus_color);
   box-shadow: var(--hover_focus_box-shadow);
 }
-#filter:active, #toggle_view:active, .close_modal:active{
+.open_big_modal:active, .close_big_modal:active, .close_modal:active,
+#filter:active, .toggle_view:active {
   color: var(--active_color);
   border :  var(--active_border);
   background-color: var(--active_background-color);
   box-shadow: var(--active_box-shadow);
 }
-
 /*
    _____                                            
   / ____|                                           
@@ -169,7 +181,10 @@ section > details> summary{
   border: var(--section_details_summary_closed_border)
 }
 
-aside{ background-color: var(--aside_background-color); }
+aside{ 
+  justify-content: space-between;
+  background-color: var(--aside_background-color); 
+}
 aside > section {
   min-height : 250px;
 }

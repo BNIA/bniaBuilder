@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Modal from 'js/components/global/Modal';
 
 const e = React.createElement;
 
@@ -13,46 +14,49 @@ export default class Header extends Component {
 
   // add Header Event Listeners after the component mounts
   componentDidMount(){ addHeaderListeners()  }
-
+  shouldComponentUpdate(nextProps, nextState){ return false }
+  
   render () {
-    // Get Settings from App
-    const { state } = this.props;
+    // Get Settings from Appmodal
+    const { state} = this.props;
     let modals = state.modals;
     let logo = state.configuration.logo == 'HYPERLINKGOESHERE' ? 'Logo' : state.configuration.logo;
+    let shortName = state.configuration.shortName.trim().toLowerCase()
     let style={ textAlign: 'left', position: 'absolute', left: '5px', top : '2px', height: '30px' }
-    let location = './images/' + logo
+    let location = './images/' + shortName + '/'+ logo
     let longName = state.configuration.longName;
     let navigationLabel = state.configuration.navigationLabel;
 
     // The Modal Components onClick Event listener acts on these Menu labels.
     let menuContent = !modals ? '' : modals.map(function(x, i){
       if(x.buttonlabel != ''){ return (
-        e('button', { key:i, className: 'open_modal', title:'modal_'+x.modalheader}, x.modalheader.replace(/_/g, ' ') )
+        e('button', { key:i, className: 'open_modal', modalid:'modal_'+x.modalheader , title:'click for more'}, x.modalheader.replace(/_/g, ' ') )
       ) }
     })
 
     return (
       <header>
         <menu id='header_menu'>
+          <Modal modal={state.modals} appName={state.configuration.longName}/>
           <figure> 
-            <img src={location} className="hidden-md-down" alt={logo} style={style} /> 
+            <img src={location} title={'Logo Image'} className="hidden-md-down" alt={logo} style={style} /> 
           </figure>
           { menuContent }
         </menu>
 
         <nav id='global_navigation' className="global_navigation" role="navigation" aria-label="global_navigation">
-          <button className='toggle_nav'>
+          <button title={'Toggle navigation'} className='toggle_nav'>
             <div className='fa fa-bars'></div>
               {navigationLabel}
           </button>
         </nav>
 
         <figure> 
-          <img src={location} className="hidden-md-up" alt={logo} width="50px" height="50px"/> 
-          <small className="hidden-md-down">{longName}</small>  
+          <img title={'Site Name'} src={location} className="hidden-md-up" alt={logo} width="50px" height="50px"/> 
+          <small title={'Site Name'} className="hidden-md-down">{longName}</small>  
         </figure>
 
-        <button id='toggle_header_menu'> Menu </button>
+        <button title={'Toggle Menu'} id='toggle_header_menu'> Menu </button>
       </header>
     )
   }

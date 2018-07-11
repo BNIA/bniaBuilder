@@ -32,6 +32,16 @@ module.exports = env => {
   module: {
     rules: [
       {
+          test: /\.worker\.js$/,
+          use: { 
+            loader: 'worker-loader',
+            options: {
+              inline: true,
+              name: '[hash].[hash].js'
+            }
+          }
+      },
+      {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
@@ -68,10 +78,6 @@ module.exports = env => {
       chunkFilename: "[id].css"
     }),
     new BundleAnalyzerPlugin(),
-    new WebpackMonitor({
-      launch: true,
-      port: 8889
-    }),
     new CopyWebpackPlugin([
       { from: './src/json_config.json', to: 'json_config.json', toType: 'file' },
       { from: './src/manifest.json', to: 'manifest.json', toType: 'file' },
@@ -83,6 +89,7 @@ module.exports = env => {
   ],
   output: {
     filename: '[name].[hash].js',
+    globalObject: "this"
   },
   optimization: {
     splitChunks: {
@@ -95,4 +102,9 @@ module.exports = env => {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader,"css-loader"]
       },
+
+    new WebpackMonitor({
+      launch: true,
+      port: 8887
+    }),
 */

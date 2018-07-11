@@ -1,0 +1,11 @@
+dist/
+monitor/
+node_modules/
+profiles/
+v8-compile-cache-0/
+.git
+profiles
+monitor
+
+npm-debug.log
+
