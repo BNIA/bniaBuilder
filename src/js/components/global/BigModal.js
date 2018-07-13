@@ -21,8 +21,13 @@ export default class BigModal extends Component {
   render() {
     const { state } = this.props;
     let details = state.details;
-    let props = details.clickedRecord;
-    let [lng, lat] = props.xcord ? [props.xcord, props.ycord] : props.geometry.coordinates;
+    let feature = details.clickedRecord;
+    let props = feature.properties;
+    let coords = '';
+    if(feature.geometry.coordinates.length == 2){ coords = feature.geometry.coordinates }
+    else{ coords = feature.geometry.coordinates[0]	}
+    let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
+    let [lng, lat] = coordinates;
     // Street View
     let styleContainer = { width: '50%', margin: 'auto' }
     let styleBtn = { width: '50px', height: '50px', border: '1px solid black', margin: '5px', borderRadius: '5px' }

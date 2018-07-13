@@ -76,7 +76,8 @@ export async function getDetails( event, state ){
   startWait()
   // Each record has a 'layer' attribute which points to its dictionary.
   let props = event.target.feature.properties;
-  let layer = state.dictionaries.filter( dictionary => props.layer == (dictionary.service + dictionary.layer).toLowerCase() )[0];
+  let layer = state.dictionaries.filter( dict => props.layer == (dict.service + dict.layer) )[0];
+
   if (layer.layer != 'basic_prop_info'){ layer['connectedRecords'] = await queryDynamicDb( layer, 'connect', props )  }
 
   // The records dictionary contains information on connectedDictionaries which we want to retrieve information on.
@@ -105,7 +106,7 @@ export async function getDetails( event, state ){
 
   stopWait()
   return {
-    clickedRecord : event.target.feature.properties,
+    clickedRecord : event.target.feature,
     clickedLayer : layer,
     foreignLayers,
   }
@@ -123,6 +124,7 @@ async function queryDynamicDb( layer, method, props ){
   let obj = ''; let event = ''; let field = '';
   if (layer.host=='bniaApi'){obj=new BniaSearch(layer); }
   if (layer.host=='arcgis') {obj=new EsriSearch(layer); }
+  //console.log(layer, method, props);
   return obj[method](props);
 }
 

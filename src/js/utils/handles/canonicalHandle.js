@@ -13,7 +13,7 @@ export class Cannonical {
     let root = "https://services1.arcgis.com/mVFRs7NF4iFitgbY/ArcGIS/rest/services/Parcels/FeatureServer/0/query?where=";
     let end = '&outFields=ADDRESS,BLOCKLOT,BLOCK,LOT&outSR=4326&returnGeometry=true&returnCentroid=true&f=pgeojson'
     let query = root + fieldsVals + end;
-    let serverReturnedThis = await fetchData(query).then(json => { return json.features; })
+    let serverReturnedThis = await fetchData(query).then(json => { return json; })
     console.log('Operation : parcelGeometry, Query Sent : ', query, ', Server Returned :', serverReturnedThis);
     return serverReturnedThis
   }

@@ -3,6 +3,10 @@ import React, {Component} from 'react';
 import Body from 'js/components/global/Body';
 import Header from 'js/components/global/Header';
 
+import { getSheets } from 'js/utils/sheets'
+import { downloadObjectAsJson } from 'js/utils/utils.js'
+import { fillDictionaries } from 'js/utils/dictionary'
+
 import {getFieldSuggestion, handleSubmit, getDetails, handleReset} from 'js/utils/search'
 import * as myConfig from '../../json_config.json';
 
@@ -15,6 +19,7 @@ export default class App extends Component {
     this.handleReset = this.handleReset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showDetails = this.showDetails.bind(this);
+    this.getSheets = this.getSheets.bind(this);
     this.state = myConfig
   }
 
@@ -79,6 +84,30 @@ export default class App extends Component {
     } );
   }
 
+  // Download the google spreadsheet
+  async getSheets(event){
+  	event.preventDefault();
+  	console.log('getsheets');
+    let target = event.target;
+    console.log(target);
+    let dropdowns = target.getElementsByTagName('select')
+    let haha = await getSheets( dropdowns[0].value );
+    if( haha == null){return null}
+    else{
+      console.log(haha);
+      let newState = {}
+      haha.map( sheet => {
+      	newState[sheet.title] = sheet.entry
+      } )
+      let filledDictionaries = await fillDictionaries(newState.layers);
+      newState.dictionaries = filledDictionaries;
+      delete newState.layers;
+      setTimeout(function(){
+      	 downloadObjectAsJson( newState, 'json_config' ) 
+      }, 3000);
+    }
+  }
+
   // Toggles Text to Speach
   async componentDidMount(){ 
     this.state.configuration.speech ? await import('js/utils/annyang.min.js') : ''; 
@@ -86,7 +115,7 @@ export default class App extends Component {
     this.setState( { BigModal : BigModal.default } )
   }
   render () {
-
+    console.log(this.state);
     if (navigator.appName == 'Microsoft Internet Explorer' || !!(navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/))){ alert("Please dont use IE."); }
     
     // These functions are crucial for the app to work.
@@ -95,7 +124,8 @@ export default class App extends Component {
       submitted : this.handleSubmit,
       removed : this.handleRemove,
       reset : this.handleReset,
-      showDetails : this.showDetails
+      showDetails : this.showDetails,
+      getSheets : this.getSheets
     };
 
     // CSS Variables allow for dynamic Style and Theming.

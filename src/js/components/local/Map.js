@@ -20,6 +20,7 @@ export default class Map extends Component {
     this.state = { 
       map : null,
       mapLayers : [],
+      layersData : [],
       layerStyles : {},
       renderedData : {}
     };
@@ -85,78 +86,113 @@ export default class Map extends Component {
   // ComponentDidUpdate will handle changes to our layers
   async componentDidUpdate(prevProps, prevState) {
     const { state, stateFunctions } = this.props;
-    let {map, renderedData, layerStyles} = this.state;
+
+    // Start by getting the Legend and clearing its innerHTML
+    let legend = document.getElementsByClassName("legendContainer")[0];
+    let legendContent = ''; legend.innerHTML = legendContent;
 
     let dictionaries = state.dictionaries;
-    dictionaries.map( async layer => {
+    dictionaries.map( async layer => {     
+      let map = this.state.map;
       let mapLayers = this.state.mapLayers;
-      let mapLayersKeyName = layer.service+layer.layer;
-      // check Map Layers
-      let layerData = layer.dataWithGeometry
-      if( !layerData && mapLayers.includes(mapLayersKeyName) ){
-        // delete layername from mapLayers, styles from layerStyles{ layerName : style }, layer from map
-        map.hasLayer(renderedData[mapLayersKeyName]) ? map.removeLayer(renderedData[mapLayersKeyName]) : null;
-        let d = this.state.renderedData; delete d[mapLayersKeyName];
-        let s = this.state.layerStyles; delete s[mapLayersKeyName];
-        let newMapLayers = this.state.mapLayers; newMapLayers = mapLayers.filter(e => e !== mapLayersKeyName)
-        //console.log('mapLayers',newMapLayers); console.log('layerStyles',s); console.log('renderedData',d );
-        this.setState({'map':map, 'mapLayers':newMapLayers, 'layerStyles':s, 'renderedData':d })
+      let layerStyles = this.state.layerStyles;
+      let layersData = this.state.layersData;
+      let renderedData = this.state.renderedData;
+      let layerKey = layer.service+layer.layer;
+      let layerData = layer.dataWithGeometry;
+
+      if( !layerData && mapLayers.includes(layerKey) ){ // Remove Layer
+        map.hasLayer(renderedData[layerKey]) ? map.removeLayer(renderedData[layerKey]) : null;
+        delete renderedData[layerKey];
+        delete layersData[layerKey];
+        delete layerStyles[layerKey];
+        let newMapLayers = this.state.mapLayers; newMapLayers = mapLayers.filter(e => e !== layerKey)
+        this.setState({map, 'mapLayers':newMapLayers, layerStyles, renderedData, layersData })
       }
-      else if( layerData && !mapLayers.includes(mapLayersKeyName) ){
-
-        // Update State MapLayers
-        mapLayers.push(mapLayersKeyName);
-
-        // Update State LayerStyles
-        layerStyles[mapLayersKeyName] = await getStyles(layer);
-
-
+      else if(layerData){
+        layersData = this.state.layersData      
+        if( !mapLayers.includes(layerKey) ){
+          mapLayers.push(layerKey);
+          layerStyles[layerKey] = await getStyles(layer);
+          layersData[layerKey] = [];
+          layersData[layerKey].unshift(layerData);
+          legend.innerHTML += addLayerToLegend( layerStyles[layerKey], layer.alias.replace(/_/g, " ") )
+          //console.log('First Time, Adding Layer')
+        }
+        else{
+          const oldUnique = [...new Set(layersData[layerKey][0].map( obj => obj.properties[layer.primarykey] ))];
+          const newUnique = [...new Set(layerData.map( obj => obj.properties[layer.primarykey] ))];
+          const intersect = [...new Set(oldUnique)].filter(x => new Set(newUnique).has(x));
+          legend.innerHTML += addLayerToLegend( layerStyles[layerKey], layer.alias.replace(/_/g, " ") )
+          if( newUnique.length == intersect.length ){ return null }
+          this.state.renderedData ? map.hasLayer(this.state.renderedData[layerKey]) ? map.removeLayer(this.state.renderedData[layerKey]) : null : null
+          //layersData[layerKey] = mergeObjOnProp(layersData[layerKey], layerData, layer.primarykey);
+          layersData[layerKey].unshift(layerData);
+          //console.log('Merging Layer', layerKey, layersData[layerKey] )
+        }
         // Get Alias
         let layerAlias = layer.alias.replace(/_/g, " "); 
         layerAlias = layerAlias.charAt(0).toUpperCase() + layerAlias.slice(1);
-
-
         // Compile all those variables into an object
         let renderObject = { 
           map,
           layer : layer,
           stateFunc : this.props.stateFunctions,
           alias : layerAlias, 
-          styles : layerStyles[mapLayersKeyName],
-          layerKey : mapLayersKeyName,
-          records : layerData, 
+          styles : layerStyles[layerKey],
+          layerKey : layerKey,
+          records : layersData[layerKey].reduce( (a, b) =>{ return a.concat(b) } ), 
           context : layer.fields.filter((field) => { return field.righthand }),
           hover : layer.fields.filter((field) => { return field.revealonhover }),
         }
-
         // Pass that object into our Render Layer function
         let newLayer = renderLayer.call(this, renderObject );
         let renderedData = this.state.renderedData;
-        renderedData[mapLayersKeyName] = newLayer;
-        renderedData[mapLayersKeyName].addTo(map)
-        
-        
+        renderedData[layerKey] = newLayer;
+        newLayer.addTo(map)
         // Zoom to the location if only one thing was rendered
-        if( layerData && layerData.length == 1 ){
+        if( layersData[layerKey] && layersData[layerKey][0].length == 1 ){
           let layer = map._layers[newLayer._leaflet_id];
           let layerId = Object.keys(layer._layers)[0];
           let feature = layer._layers[layerId];
           feature.fire('click');
           map.panBy([150, 0]);
         }
-
-        this.setState({ layerStyles, map, mapLayers, renderedData });
-      }
-      else if( layerData ){
-        // GeometryData exists and so deos MapLayers. Old Geom Data is not the same as the New Geom data though. 
-        // I.E. this.props.state.dictionaries[name]GeometryData != prevProps.state.dictionaries[name]GeometryData
-        // console.log('Update ', layer );
-        // remove layer from map
-        // add layer to map
+        
+        this.setState({ layerStyles, map, mapLayers, renderedData, layersData });
       }
     } )
   }
   render() {
     return ( < div id = "mapid"  className='custom-popup' tabIndex = "-1" > < /div> )
   }
+}
+
+
+// LEGEND
+function addLayerToLegend(styles, updateLayerAlias){
+  let legendContent = '';
+  if(styles.uniqueValueInfos.length){
+    legendContent += '<div>'
+    legendContent += '<h4>' + updateLayerAlias + '</h4>';
+    styles.uniqueValueInfos.map((field) => {
+      if(field.image){
+        legendContent += "<h4 style='width:90%; padding-left: -10px; background: url(" + field.image + ") no-repeat left center;'>" + field.label + "</h4>";
+      }
+      else{
+        legendContent += "<h4 style='width:90%; padding-left: -10px; background: " + field.color + " no-repeat left center;'>" + field.label + "</h4>";
+      }
+    });
+  }
+  if(styles.line && styles.color){
+    let label = updateLayerAlias;
+    if(styles.uniqueValueInfos.length){ label = 'Unassigned'}
+    legendContent += "<div style='width:100%; background:" + styles.color + ";'>" + label + "</div>"; 
+  }
+  if(styles.image){
+    let label = updateLayerAlias;
+    if(styles.uniqueValueInfos.length){ label = 'Unassigned'}
+    legendContent += "<div style='width:100%; padding-left: -10px; background: url(" + styles.image + ") no-repeat left center; background-size: 10px 10px;'>" + label + "</div>"; 
+  }
+  return legendContent
 }

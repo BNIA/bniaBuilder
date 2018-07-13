@@ -85,9 +85,10 @@ export class BniaSearch extends Cannonical {
         fieldsVals += 'OR+%28lot+%3D+%27'+loc+'%27+AND+Block+%3D+%27'+lot+'%27%29' // OR (lot = '012' AND Block ='0015')
       } )
       serverReturnedThis = await this.parcelGeometry( fieldsVals );
-      // Stuff the geometries you just got back into each record. start by maping through your records.
+      serverReturnedThis = serverReturnedThis.features.map(attr => attr)
+      console.log(serverReturnedThis);
+      // For each record.
       returnThis = records.map( record => {
-        let newRecord = false
         // Find its Coordinates
         let parcel = serverReturnedThis.filter( uniqueParcel => {
           let flag =  uniqueParcel.properties['Blocklot'] == record['block_lot'];
@@ -95,15 +96,32 @@ export class BniaSearch extends Cannonical {
           flag = flag ? flag : uniqueParcel.properties['LOT'] == record['lot']
           flag = flag ? flag : uniqueParcel.properties['LOT'] +" "+uniqueParcel.properties['BLOCK'] == record['block_lot']
           return flag
-        } )
+        } )[0]
+        var outGeoJson = {}
+        outGeoJson['properties'] = record;
+        outGeoJson['type']= "Feature";
+
+        // if a coordinates are found          
         if(parcel != []){
-          Object.assign(parcel[0]['properties'],record);
-          newRecord = parcel[0]
-          // And insert it into the record
+          // insert it into the record
+          console.log(outGeoJson, record, parcel)
+          //Object.assign(outGeoJson['properties'],parcel);
+          
+          if(parcel['geometry'] && parcel['geometry']['coordinates']){
+            outGeoJson['geometry']= parcel['geometry']
+          }
+          else if(record && record['xcord']){
+            outGeoJson['geometry']= {"type": "Point", "coordinates": [record['ycord'], record['xcord']] }
+          }
+          else{
+            outGeoJson['geometry']= {"type": "Point", "coordinates": [undefined,undefined] }
+          }
         }
         else{ alert('parcel could not be found'); }
-        return newRecord
+        return outGeoJson
       } )
+
+      console.log('Operation : GetBlocklotsAssociatedRecords, Query Sent : ', query, ', Server Returned :', returnThis);
     }
     else if( uniqueBlockLots.length ){ 
       // Get Coords
@@ -151,8 +169,8 @@ export class BniaSearch extends Cannonical {
   //
   // This will search for all the information pertaining to a blocklot.
   async connect(props) {
-    // Esri/Bnia semantic conflict
-    let query = this.root+'&table='+this.layerLayer+'&fields=block_lot&fieldsVals='+clean(props.block_lot)+'&purpose=connect';
+    let blockl = props.block_lot ? clean(props.block_lot) : props.BL ? clean(props.BL) : 'NoBlocklot'
+    let query = this.root+'&table='+this.layerLayer+'&fields=block_lot&fieldsVals='+blockl+'&purpose=connect';
     let serverReturnedThis = Object.values(await fetchData(query));
     console.log('Operation : GetBlocklotsAssociatedRecords, Query Sent : ', query, ', Server Returned :', serverReturnedThis);
     return serverReturnedThis;

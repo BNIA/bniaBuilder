@@ -17,6 +17,7 @@ export default class DataTable extends Component {
 		  // if field.search assign property attributes into a new object.
 		  let revealthese = layer.fields.filter(field => field.search == true).map(field => ({ Header: field.alias, accessor: field.name }))
 		  !Object.values(layer.fields[0]).includes('block_lot') ? null:revealthese.unshift({Header:'Block Lot', accessor:'block_lot'});
+		  !layer.dataWithGeometry[0] ? null : !Object.keys(layer.dataWithGeometry[0].properties).includes('BL') ? null:revealthese.unshift({Header:'Block Lot', accessor:'BL'});
 		  return ( [
 		    <br key={index+'b'} />,
 		    <h2 key={index+'j'} >{layer.alias}</h2>,
@@ -34,11 +35,11 @@ export default class DataTable extends Component {
 	let instructions = (
 	<article key='instructions' style={{padding:'10px'}}>
 	  <h1>Table View</h1>
-	  <h3>Your search queries will show here</h3>
-	  <p> &#8226; Sort tables by clicking a columns title</p>
-	  <p> &#8226; Sort multiple columns by holding shift</p>
+	  <p> &#8226; Sort tables by clicking a columns title </p>
+	  <p> &#8226; Sort multiple by holding the <kbd>shift</kbd> key </p>
+	  <p> &#8226; Filter tables using the white boxes </p>
+	  <p> &#8226; Maps keeps historical search results when a new search is made. The Tables do not. </p>
 	  <p> &#8226; Only the most recent record per blocklot will be shown </p>
-	  <p> &#8226; A detailed view is accessible using 'Property Look-Up' </p>
 	</article>
 	)
 	newtables.unshift(instructions);

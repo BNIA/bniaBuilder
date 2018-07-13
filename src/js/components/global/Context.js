@@ -3,6 +3,10 @@ import { fetchData } from 'js/utils/utils';
 import ReactDisqusComments from 'react-disqus-comments';
 import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
 
+import {getSheets} from 'js/utils/sheets'
+import { downloadObjectAsJson } from 'js/utils/utils.js'
+import {fillDictionaries} from 'js/utils/dictionary'
+
 export default class Context extends Component {
   displayName: 'Context';
   constructor(props) {
@@ -16,10 +20,15 @@ export default class Context extends Component {
   componentDidUpdate(prevProps, prevState){	
   	let details = this.props.state.details;
   	if(details && details !== prevProps.state.details){
-  	  let props = details.clickedRecord;
-  	  let coordinates = props.xcord ? [props.xcord, props.ycord] : clickedRecord.geometry.coordinates;
+  	  let feature = details.clickedRecord
+  	  let props = feature.properties;
+	  let coords = '';
+	  if(feature.geometry.coordinates.length == 2){ coords = feature.geometry.coordinates }
+	  else{ coords = feature.geometry.coordinates[0]	}
+  	  let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
       let identifier = 'Coordinates : '+coordinates[1]+'&'+coordinates[1];
       const notEmpty = (value) => { return value && value.length > 3; }
+      if( notEmpty(props.BL) ){ identifier = 'BlockLot : '+ props.BL}
       if( notEmpty(props.BLOCKLOT) ){ identifier = 'BlockLot : '+ props.BLOCKLOT}
       else if ( notEmpty(props.ADDRESS) ){ identifier = 'Address : '+ props.ADDRESS}
       else if( notEmpty(props.NAME) ) { identifier = 'Name : '+ props.NAME}
@@ -66,7 +75,7 @@ export default class Context extends Component {
 	  }
 
       // GSV address label
-	  let clickedRecord = details.clickedRecord;
+	  let clickedRecord = details.clickedRecord.properties;
 	  if( (clickedRecord.name)  && clickedRecord.name    != ' ' ){ givenName = clickedRecord.name }
 	  if( (clickedRecord.Name)  && clickedRecord.Name    != ' ' ){ givenName = clickedRecord.Name }
 	  if( (clickedRecord.NAME)  && clickedRecord.NAME    != ' ' ){ givenName = clickedRecord.NAME }
@@ -101,10 +110,10 @@ export default class Context extends Component {
           < /details> 
           < details open key = { 'contexDetail12' } > 
             < summary > Details < /summary > 
-            { clickedDetails}
-            { download }
             { modalButton }
+            { clickedDetails}
             { controller } 
+            { download }
           < /details> 
           < details open key = { 'contexDetail13' } > 
             < summary > Discussion  < /summary > 
@@ -123,7 +132,7 @@ export default class Context extends Component {
 
 // COMPONENT -> Get all clicked details
 const ClickedDetails = (details) => {
-  let clickedRecord = details.clickedRecord;
+  let clickedRecord = details.clickedRecord.properties;
   let dictionary = details.clickedLayer;
   let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
   let alias = dictionary.alias;

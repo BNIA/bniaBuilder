@@ -35,8 +35,9 @@ export class EsriSearch extends Cannonical {
       let value = fieldValuePairs[field]
       if(!firstItem){ query += '+AND+' }
       firstItem=false;
-      query += field + "+like+'%"+ value +"%'";
+      query += field + "+like+%27%25"+ this.cln(value) +"%25%27";
     } )
+
     query = this.root+"where="+query+'&outFields=*&returnGeometry=false&returnDistinctValues=true&f=pjson';
     let serverReturnedThis = await fetchData(query);
     serverReturnedThis = serverReturnedThis.features;
@@ -55,7 +56,7 @@ export class EsriSearch extends Cannonical {
       let value = fieldValuePairs[field]
       if(!firstItem){ query += '+AND+' }
       firstItem=false;
-      query += field+"+like+%27%25"+value+"%25%27"
+      query += field + "+like+%27%25"+ this.cln(value) +"%25%27";
     } )
     // If no fieldValuesexist.
     if(firstItem){ query = "1=1" }
@@ -80,5 +81,45 @@ export class EsriSearch extends Cannonical {
       } );
     console.log('Operation : getRecords, Query Sent : ', query, ', Server Returned :', returnThis);
     return returnThis
+  }
+
+  //
+  //  Connect between Records
+  //
+  // This will search for all the information pertaining to a blocklot.
+  async connect(props) {
+    // url to our layer
+    let ending = '&returnGeometry=false' + '&outFields=*' + '&f=pjson';
+    let query = this.root + 'where=1=1';
+    if( props.NAME && props.NAME != ' ' ){ query = this.root + "where=NAME+like%27%25"+this.cln(props.NAME)+'%25%27'; }
+    else if( props.ADDRESS && props.ADDRESS != ' ' ){ query = this.root + "where=ADDRESS+like%27%25"+this.cln(props.ADDRESS)+'%25%27'; }
+    query = query + '&returnGeometry=false';
+    query = query + '&outFields=*';
+    query = query + '&f=pjson';
+    if( (props.BL) && props.BL != ' ' ){ 
+      query = this.root + "where=BL+like%27%25"+this.cln(props.BL)+'%25%27'; 
+    }
+    else if( (props.NAME) && props.NAME != ' ' ){ 
+      query = this.root + "where=NAME+like%27%25"+this.cln(props.NAME)+'%25%27'; 
+    }
+    else if( (props.Name) && props.Name != ' ' ){ 
+      query = this.root + "where=Name+like%27%25"+this.cln(props.Name)+'%25%27'; 
+    }
+    else if( props.ADDRESS && props.ADDRESS != ' ' ){ 
+      query = this.root + "where=ADDRESS+like%27%25"+this.cln(props.ADDRESS)+'%25%27'; 
+    }
+    else {
+      query = this.root + 'where=1=1' 
+    }
+    // final Query Specifications
+    query = query + ending 
+    let serverReturnedThis = await fetchData(query)
+    let returnThis = serverReturnedThis.features.map(attr => attr.attributes)
+    console.log('Operation : GetBlocklotsAssociatedRecords, Query Sent : ', query, ', Server Returned :', returnThis);
+    return returnThis
+  }
+  // Prepares individual values for query
+  cln(value) {
+    return value.trim().replace(/ /g, "+").replace(/'/g, "''")
   }
 }

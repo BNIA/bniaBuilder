@@ -37,6 +37,22 @@ export default class Navigation extends Component {
     let promptStyle={padding:'10%', width: '80%'}
     //( sorted by most recent year )
 
+    let downloadit = false;
+    let downloadgss = !downloadit ? '' : (
+      <form onSubmit={stateFunctions.getSheets}>
+		<select>
+		  <option value="null">Select Spreadsheet</option>
+		  <option value="10R29VjJbZhPNR-JBnecKjYMjQI5_r8SU375nMr_xzK4">BOLD</option>
+		  <option value="1PpzuE3dwuXxN8HIckuaK2DbrXEbxOlVrDM5HWsVuDIw">GreenPatterns</option>
+		  <option value="234">BIP</option>
+		  <option value="1g86NoBd51kQ9svU64rABZep4tcvOqqxOV3Ko53VgiNA">This Site</option>
+		  <option value="1tu2CkBiUiY7S3A9EhVZ4Ba6Tm4HGH-yfrbD7J7Ap5X4">Developers</option>
+		</select>
+		<button> Download Spreadsheet </button>
+	  </form>
+	)
+
+
     let prompt = 
       <div style={promptStyle}>
         <p> <b> Please Note : </b> </p>
@@ -55,6 +71,7 @@ export default class Navigation extends Component {
     return (
       <aside id='navigation_drawer'>
 	    <section> {controller} </section>
+	    {downloadgss}
 	    <div id='mainNav'>
          {toggleTableView}
 	    </div>
