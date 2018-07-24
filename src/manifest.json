@@ -1,44 +1,33 @@
 {
-  "name": "Baltimore Open Land Data",
-  "short_name": "BOLD",
-  "start_url": "https://bniajfi.org/bold/",
+  "name": "Baltimore Light Stage",
+  "short_name": "BLS",
+  "theme_color": "#222222",
+  "background_color": "black",
   "display": "standalone",
-  "background_color": "#30A0F0",
-  "theme_color": "#2090F0",
-  "description": "Baltimore Open Land Data",
+  "Scope": "/",
+  "start_url": "https://charleskarpati.com/light/",
+  "description": "Baltimore Light Stage",
   "dir":"rtl",
-  "lang":"ar",
-  "icons": [{
-    "src": "./images/bold/Bold16.ico",
-    "sizes": "16x16",
-    "type": "image/ico"
+  "icons": [ {
+    "src": "./images/icons/icon-72x72.png",
+    "sizes": "72x72",
+    "type": "image/png"
   }, {
-    "src": "./images/bold/Bold32.jpg",
-    "sizes": "32x32",
-    "type": "image/ico"
+    "src": "./images/icons/icon-96x96.png",
+    "sizes": "96x96",
+    "type": "image/png"
   }, {
-    "src": "./images/bold/Bold64.jpg",
-    "sizes": "64x64",
-    "type": "image/ico"
-  }, {
-    "src": "./images/bold/Bold144.jpg",
+    "src": "./images/icons/icon-144x144.png",
     "sizes": "144x144",
     "type": "image/png"
   }, {  
-    "src": "/images/bold/Bold192.png",  
+    "src": "/images/icons/icon-192x192.png",  
     "sizes": "192x192",  
     "type": "image/png"  
   }, {  
-    "src": "/images/bold/Bold256.png",  
-    "sizes": "256x256",  
-    "type": "image/png"  
-  }, {  
-    "src": "/images/bold/Bold384.png",  
-    "sizes": "384x384",  
-    "type": "image/png"  
-  }, {  
-    "src": "/images/bold/Bold512.png",  
+    "src": "/images/icons/icon-512x512.png",  
     "sizes": "512x512",  
     "type": "image/png"  
-  }]
+  } ],
+  "splash_pages": null
 }

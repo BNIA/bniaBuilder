@@ -21,23 +21,30 @@ export default class Navigation extends Component {
     // Map the groups, subgroups and layers into corresponding 'Details' panes
     let controller = sortDictionaries(dictionaries).map( (group, i) => {
       // Layer Stands Alone
-      if (group.length == 1 && group[0].length == 1) { 
-        return ( < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
-      ) }
+      if (group.length == 1 && group[0].length == 1) {
+      	return null
+        // return ( < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
+       }
       // Multiple Layers in Group
       let detailContent = group.map((subgroup, i)=>{
       	// Layer is not a SubGroup
-        if (subgroup[0]['subgroup'] == false){ return subgroup.map( (item, i) => {return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> }) }
+        if (subgroup[0]['subgroup'] == false){ 
+          return subgroup.map( (item, i) => {
+          	return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> 
+          } )
+        }
         // Layer is a subgroup
-        let subgroupContent = subgroup.map( (item, i) => { return <Details key={i} layer={ item } state={state} stateFunctions={stateFunctions}/> } )
+        let subgroupContent = subgroup.map( (item, i) => { 
+          return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> 
+        } )
         return SimpleDetails(subgroup[0]['subgroup'], subgroupContent);
-      } );
+      } )
       return SimpleDetails(group[0][0]['group'], detailContent);
-    } );
+    } )
     let promptStyle={padding:'10%', width: '80%'}
     //( sorted by most recent year )
 
-    let downloadit = false;
+    let downloadit = true;
     let downloadgss = !downloadit ? '' : (
       <form onSubmit={stateFunctions.getSheets}>
 		<select>
@@ -46,7 +53,7 @@ export default class Navigation extends Component {
 		  <option value="1PpzuE3dwuXxN8HIckuaK2DbrXEbxOlVrDM5HWsVuDIw">GreenPatterns</option>
 		  <option value="234">BIP</option>
 		  <option value="1g86NoBd51kQ9svU64rABZep4tcvOqqxOV3Ko53VgiNA">This Site</option>
-		  <option value="1tu2CkBiUiY7S3A9EhVZ4Ba6Tm4HGH-yfrbD7J7Ap5X4">Developers</option>
+		  <option value="1127B86Jm5nKxzbXRVEFR18F0z1Dv3tk6okTkRMZdtJU">Developers</option>
 		</select>
 		<button> Download Spreadsheet </button>
 	  </form>
@@ -99,5 +106,3 @@ function addNavigationListeners(){
     });
   }
 }
-
-// The offset is what is taking esri so long.

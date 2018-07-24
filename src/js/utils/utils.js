@@ -21,7 +21,8 @@ function sortByValue( dictionaries, key ){
 }
 // COMPONENT : Display information as a Details Dropdown
 export function SimpleDetails (summary, details) {
-  return (
+  //console.log('Simple Details', summary, details)
+  return !summary ? null : (
     < details key = { summary } >
       < summary > { summary } < /summary >
       { details }

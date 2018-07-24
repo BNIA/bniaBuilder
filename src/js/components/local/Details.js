@@ -1,7 +1,19 @@
 import React, {Component} from 'react';
+
+//myElement.classList.toggle('some-class')
+//el.classList.toggle('some-orange-class', theme === 'orange'); //conditional
+//myElement.closest('article').querySelector('h1'); // get h1 from nearest article in parents
+//if (myElement.matches('.some-class')) {
+
 //import {Datalist} from 'js/components/local/filterDatalist';
 //import {Dropdownlist} from 'js/components/local/filterDropdown';
 // import Worker from 'worker-loader!./js/utils/Worker.js';
+//if (!modalEl.contains(e.target)) modalEl.hidden = true;
+//Array.from()
+// document.getElementById("myDialog").showModal() 
+//https://codepen.io/giuseppesalvo/pen/wrYrVb
+//https://codepen.io/sdurphy/pen/dPpawz
+
 import Worker from 'js/utils/Worker.worker.js'
 import Form from 'js/components/local/Form.js'
 
@@ -27,7 +39,8 @@ export default class Details extends Component {
   componentWillReceiveProps(nextProps){ this.updateForm( ) }
 
   // Prepare the Form
-  async updateForm( ){    
+  async updateForm( ){
+    console.log(this.props.layer)
     this.worker.postMessage({'cmd': 'prepareSuggestions', 'msg': this.props.layer });
     this.worker.onmessage = async (m) => {    
       let update = true;
@@ -40,7 +53,7 @@ export default class Details extends Component {
         console.log('noupdate')
         this.setState( { 'update' : false } )
       } 
-    }; 
+    }
   } 
   
   // RENDER
