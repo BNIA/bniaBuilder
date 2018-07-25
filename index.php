@@ -14,18 +14,14 @@ $p = parse_url( $url );         // Parse URL - http://php.net/manual/en/function
 $q = explode('&', $p['query']);
 // Store Query parameters
 $parameters = (object) [];
-if ( sizeof($pair) != 0 ){
-  foreach ($q as $pair){
-    list($key, $value) = explode('=', $pair);
-    $key = str_replace("%20", " ", $key);
-    $value = str_replace("%20", " ", $value);
-
-    //echo ', key : '.$key;
-    //echo ', value : '.$value;
-    $parameters->$key = $value; 
-  };
-}
-
+foreach ($q as $pair){
+  list($key, $value) = explode('=', $pair);
+  $key = str_replace("%20", " ", $key);
+  $value = str_replace("%20", " ", $value);
+  //echo ', key : '.$key;
+  //echo ', value : '.$value;
+  $parameters->$key = $value;
+};
 // Sanitize - http://php.net/manual/en/filter.filters.sanitize.php
 $table = $parameters -> table;
 // Fields and Fieldsvals may be an array or const.
@@ -38,9 +34,9 @@ $purpose = $parameters -> purpose;
 if( isset($_GET['ACCOUNT_ID'])) { $ACCOUNT_ID = $_GET['ACCOUNT_ID']; }
 else{ $ACCOUNT_ID = false; }
 
-$PROP_INFO=array();
 if (substr($_SERVER['SCRIPT_NAME'], 1, -4)=="api"){
   if ($_SERVER['REQUEST_METHOD']=='GET') {
+    $PROP_INFO=array();
     if( $purpose == 'display'){
       $fields = explode("END", $fields);
       $fieldsVals = explode("END", $fieldsVals);
@@ -83,8 +79,8 @@ if (substr($_SERVER['SCRIPT_NAME'], 1, -4)=="api"){
       $sql = "SELECT `".$fields."`, `block_lot` FROM `".$table."` WHERE `".$fields."` like '%".$fieldsVals."%' GROUP BY `".$fields."` ORDER BY `block_lot` ASC limit 10";
       if ($result = mysqli_query($con, $sql) ) { while($row = mysqli_fetch_assoc($result)) { $PROP_INFO[]=$row; } }
     }
+    echo json_encode($PROP_INFO);
   }
 }
-echo json_encode($PROP_INFO);
 mysqli_close($con);
 ?>
