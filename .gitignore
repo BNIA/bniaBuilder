@@ -4,8 +4,8 @@ node_modules/
 profiles/
 v8-compile-cache-0/
 .git
-profiles
 monitor
+profiles
 
 npm-debug.log
 
