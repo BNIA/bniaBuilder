@@ -33,27 +33,22 @@ module.exports = env => {
     rules: [
       {
           test: /\.worker\.js$/,
-          use: { 
+          use: {
             loader: 'worker-loader',
-            options: {
-              inline: true,
-              name: '[hash].[hash].js'
-            }
+            options: { inline: true, name: '[hash].[hash].js' }
           }
       },
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
+        use: { loader: "babel-loader" }
       },
       {
         test: /\.html$/,
         use: [
-          {
-            loader: "html-loader",
-            options: { minimize: true }
+          { 
+            loader: "html-loader", 
+            options: { minimize: true } 
           }
         ]
       },
@@ -94,6 +89,14 @@ module.exports = env => {
   optimization: {
     splitChunks: {
       chunks: 'all'
+    }
+  },
+  devServer: {
+    proxy: {
+      '/bniaBuilder': {
+        target: 'http://localhost:80',
+        secure: false
+      }
     }
   }
 }

@@ -6,17 +6,18 @@
   "author": "CharlesK",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --host 0.0.0.0 --port 80 --env.NODE_ENV=local --devtool eval-source-map --mode development --hot --inline --progress",
+    "start": "webpack-dev-server --env.NODE_ENV=local --devtool eval-source-map --mode development --hot --inline --progress",
     "build": "webpack --env.NODE_ENV=production --optimize-minimize --mode production --progress --profile",
     "prerender": "usus render --url file:///var/www/html/bniaBuilder/dist/index.html --inlineStyles > index.html"
   },
   "dependencies": {
     "esri-leaflet": "^2.1.4",
+    "esri-leaflet-geocoder": "^2.2.12",
     "leaflet": "^1.3.1",
     "react": "^16.3.0",
+    "react-disqus-comments": "^1.2.0",
     "react-dom": "^16.3.0",
-    "esri-leaflet-geocoder": "^2.2.12",
-    "react-disqus-comments": "^1.2.0"
+    "react-ga": "^2.5.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

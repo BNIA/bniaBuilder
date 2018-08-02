@@ -6,6 +6,12 @@ import App from 'js/components/App';
 // Website Styling
 import style from 'css/critical.css';
 
+// 1930 - 2017 -> 6 for 1  -> 94% 
+
+import ReactGA from 'react-ga';
+ReactGA.initialize('UA-000000-01');
+ReactGA.pageview(window.location.pathname + window.location.search);
+
 async function init() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

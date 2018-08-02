@@ -21,17 +21,15 @@ export default class Navigation extends Component {
     // Map the groups, subgroups and layers into corresponding 'Details' panes
     let controller = sortDictionaries(dictionaries).map( (group, i) => {
       // Layer Stands Alone
-      if (group.length == 1 && group[0].length == 1) {
-      	return null
-        // return ( < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
-       }
+      if (group.length == 1 && group[0].length == 1) { 
+        return < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
+      } 
       // Multiple Layers in Group
-      let detailContent = group.map((subgroup, i)=>{
+      let detailContent = group.map( (subgroup, i)=>{
       	// Layer is not a SubGroup
-        if (subgroup[0]['subgroup'] == false){ 
-          return subgroup.map( (item, i) => {
-          	return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> 
-          } )
+      	let flag = subgroup[0]['subgroup'] == false
+        if (flag){ 
+          return subgroup.map( (item, i) => { return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> } ) 
         }
         // Layer is a subgroup
         let subgroupContent = subgroup.map( (item, i) => { 

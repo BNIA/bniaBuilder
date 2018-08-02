@@ -1,5 +1,6 @@
 self.addEventListener('message', function(e) {
   var data = e.data;
+  self.postMessage('Unknown command: ' + e);
   switch (data.cmd) {
     // Determine if data needs rerendering / Sort and clean Data
     case 'prepareSuggestions':
@@ -43,5 +44,5 @@ self.addEventListener('message', function(e) {
     // Wrap it up
     default:
       self.postMessage('Unknown command: ' + data.msg);
-  };
+  }
 }, false);

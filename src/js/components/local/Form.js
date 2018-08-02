@@ -11,7 +11,7 @@ export default class Form extends Component {
       if ( !field || field.filter == false ){ return }
 
        // Use Web-Worker Preped Data
-      let prepd = prepdSug[i];
+      let prepd = prepdSug ? prepdSug[i] ? prepdSug[i] : [] : [];
       let fieldName = field.name.trim();
 
       // Create the Input -> eventhandler, layer, field, fieldname, suggestions

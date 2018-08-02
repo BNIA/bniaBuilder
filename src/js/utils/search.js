@@ -1,6 +1,7 @@
 import {fetchData, groupBy, clean} from 'js/utils/utils';
 import {BniaSearch} from 'js/utils/handles/bniaHandle';
 import {EsriSearch} from 'js/utils/handles/esriHandle';
+import {SocrataSearch} from 'js/utils/handles/socrataHandle';
 
 
 //
@@ -124,7 +125,8 @@ async function queryDynamicDb( layer, method, props ){
   let obj = ''; let event = ''; let field = '';
   if (layer.host=='bniaApi'){obj=new BniaSearch(layer); }
   if (layer.host=='arcgis') {obj=new EsriSearch(layer); }
-  //console.log(layer, method, props);
+  if (layer.host=='socrata'){obj=new SocrataSearch(layer); }
+  console.log(layer, method, props);
   return obj[method](props);
 }
 

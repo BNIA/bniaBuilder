@@ -62,6 +62,7 @@ export class EsriSearch extends Cannonical {
     if(firstItem){ query = "1=1" }
     query = this.root+"where="+query+'&outFields=*&outSR=4326&returnGeometry=true&f=pjson';
     let serverReturnedThis = await fetchData(query);
+    console.log(query);
     serverReturnedThis = serverReturnedThis.features;
     let returnThis = serverReturnedThis.map( record => {
         console.log(record)
