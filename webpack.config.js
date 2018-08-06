@@ -93,9 +93,10 @@ module.exports = env => {
   },
   devServer: {
     proxy: {
-      '/bniaBuilder': {
-        target: 'http://localhost:80',
-        secure: false
+      '/api': {
+        target: 'http://localhost:80/bniaBuilder/src/',
+        secure: false,
+        changeOrigin: true
       }
     }
   }

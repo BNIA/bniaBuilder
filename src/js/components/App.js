@@ -1,5 +1,10 @@
 import React, {Component} from 'react';
 
+import {fetchData} from 'js/utils/utils';
+
+let hi = fetchData('api/lol.php')
+console.log(hi);
+
 import Body from 'js/components/global/Body';
 import Header from 'js/components/global/Header';
 

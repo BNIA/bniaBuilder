@@ -1,0 +1,1 @@
+<?php class Credentials { var $servername = 'R0NGMjltemtwVU5DU21hWEpTWHRqQT09OjoAmJUDzvaoqsXjcpR9RZfO'; var $username = 'Q2dwdzJmbGVibTJkR2p0a1JmZksvZz09OjowMbR26Ts+BTvUsOrtKtQJ'; var $password = ''; var $database = 'QjAzSUFXVGw1ajVTWXdvUHZFV3lqdz09OjpO3xmjQiDXcG49zwS9iqGu'; } ?>
