@@ -22,14 +22,15 @@ export default class Navigation extends Component {
     let controller = sortDictionaries(dictionaries).map( (group, i) => {
       // Layer Stands Alone
       if (group.length == 1 && group[0].length == 1) { 
-        return < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
+        let underline = {width:'100%', height:'2px', background:'black'}; underline = <div key={i+'j'} style={underline}> </div>;
+        return ( [< Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } />, underline] ) 
       } 
       // Multiple Layers in Group
       let detailContent = group.map( (subgroup, i)=>{
       	// Layer is not a SubGroup
       	let flag = subgroup[0]['subgroup'] == false
         if (flag){ 
-          return subgroup.map( (item, i) => { return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> } ) 
+          return subgroup.map( (item, i) => { return [< Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> ] } ) 
         }
         // Layer is a subgroup
         let subgroupContent = subgroup.map( (item, i) => { 
@@ -37,7 +38,8 @@ export default class Navigation extends Component {
         } )
         return SimpleDetails(subgroup[0]['subgroup'], subgroupContent);
       } )
-      return SimpleDetails(group[0][0]['group'], detailContent);
+      let underline = {width:'100%', height:'2px', background:'black'}; underline = <div key={i+'j'} style={underline}> </div>;
+      return [ SimpleDetails(group[0][0]['group'], detailContent), underline ];
     } )
     let promptStyle={padding:'10%', width: '80%'}
     //( sorted by most recent year )
@@ -78,6 +80,7 @@ export default class Navigation extends Component {
 	    <section> {controller} </section>
 	    {downloadgss}
 	    <div id='mainNav'>
+	     <div title='Loading...' className="loader"></div>
          {toggleTableView}
 	    </div>
       </aside>

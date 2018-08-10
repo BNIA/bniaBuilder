@@ -68,11 +68,13 @@ export default class Context extends Component {
 	let modalButton = '';
     // Details
     if (details) {
-    	
 	  // BigModal button
 	  if(state.configuration.showAllRecordsBtn){ 
-	    modalButton = <button className='open_big_modal' > Show All  </button> 
+	    modalButton = <button className='open_big_modal' > Show All </button> 
 	  }
+
+      // Download Details
+      download = <button onClick = { () => downloadCsvs( details.clickedLayer, details.foreignLayers ) } className='downloadall'> Download All </button>;
 
       // GSV address label
 	  let clickedRecord = details.clickedRecord.properties;
@@ -84,13 +86,12 @@ export default class Context extends Component {
 
       // Construct the Clicked Detials
       clickedDetails = ClickedDetails( details )
+      //clickedDetails = ''
 
       // sort (group/subgroup nesting) for foreign layers.
       let sortedForiegnLayers = sortDictionaries(details.foreignLayers)
       controller = DetailsPane( details, sortedForiegnLayers);
 
-      // Download Details
-      download = <button onClick = { () => downloadCsvs( details.clickedLayer, details.foreignLayers ) } className='downloadall'> Download All </button>;
     }
     return (
       < aside id = 'context_drawer' > 
@@ -110,10 +111,10 @@ export default class Context extends Component {
           < /details> 
           < details open key = { 'contexDetail12' } > 
             < summary > Details < /summary > 
-            { modalButton }
+            <p> First Record will be shown </p>
             { clickedDetails}
             { controller } 
-            { download }
+            { modalButton }{ download }
           < /details> 
           < details open key = { 'contexDetail13' } > 
             < summary > Discussion  < /summary > 
@@ -214,7 +215,7 @@ const ConnectDetails = (details, dict) => {
 	  )
     } )
     // Download Details
-    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download </button>;
+    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download all {alias}</button>;
     return (
       <details key={alias}> 
         <summary> {alias} </summary>

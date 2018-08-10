@@ -6,6 +6,8 @@ export default class Form extends Component {
 
   render () {
     const { layer, stateFunctions, prepdSug } = this.props;
+    
+    if (!layer.fields){ return []; }
     let attempt = Object.keys(layer.fields).map( (field, i) => {
       field = layer.fields[field];
       if ( !field || field.filter == false ){ return }
@@ -26,6 +28,5 @@ export default class Form extends Component {
       ] )
     })
     return attempt
-
   }
 }

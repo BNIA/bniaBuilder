@@ -64,36 +64,40 @@ export default class Details extends Component {
        onClick={stateFunctions.submitted}
        title='Search Layer'
        data-key={layer.key} />;
-    let searchButton =
+    let searchButton = !layer.searchfields ? '' :
       <button type='submit' className='searchButton'
         onClick={stateFunctions.submitted}
         title='Search!'
         data-key={layer.key} >
         Search!
       </button>; 
+    // Show the reset button if searchfields is true
+    let resetButton = !layer.searchfields ? '' :
+      <button type='reset' title='Clear Search' onClick={stateFunctions.reset} >Reset </button>;
 
     // Let the user know how many matches were found.
     let respLen = layer['currentFormsData'] ? layer['currentFormsData'].length : false; let alert = '';
-    if( respLen === 0) alert = <p> No Records Found </p>
+    if( !layer.searchfields ) ''
+    else if( respLen === 0) alert = <p> No Records Found </p>
     else if( respLen == 1 ) alert = <p> Exact Match! </p>
     else if( respLen >= 100 ) alert = <p> Top 100 Records by attribute </p>
     else if( respLen >= 2) alert = <p> {respLen} records found </p>
     else alert = <p> Enter Query </p>
 
-    // Reset Button
-    let resetButton = !layer.searchfields ? '' :
-      <button type='reset' title='Clear Search' onClick={stateFunctions.reset} >Reset </button>
     let layerDescription = layer.layerdescription ? layer.layerdescription : '';
-    //console.log(layer)
+    let infoButton = layerDescription ? '' : '';
+     // <button className='fa fa-info'
+     //  onClick={ this.alert() }
+     //  title='Description' />;
+
     return <details>
-        <summary title={ layerDescription } > {layer.alias} { removeButton }{ goButton } </summary>
+        <summary title={ layerDescription } > {layer.alias} { infoButton }{ removeButton }{ goButton } </summary>
         <form data-key={layer.key}>
           { alert }
           <Form layer={layer} stateFunctions={stateFunctions} prepdSug={prepairedData}  /> 
           {searchButton}
           {resetButton}
         </form>
-        <div title='Loading...' className="loader"></div>
       </details>
   }
 }

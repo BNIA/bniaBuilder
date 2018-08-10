@@ -191,11 +191,30 @@ export const overlayLegend = L.Control.extend( {
   }
 } ); 
 
-
+export function hoverEventBoundary(event, renderObject ){
+  let hovered = event.target.feature.properties;
+  let name = false;
+  let address = false;
+  let matched = [ false, false]
+  if( (hovered.name)  && hovered.name    != ' ' ){ name = hovered.name; matched[0]='name';}
+  if( (hovered.Name)  && hovered.Name    != ' ' ){ name = hovered.Name; matched[0]='Name';}
+  if( (hovered.NAME)  && hovered.NAME    != ' ' ){ name = hovered.NAME; matched[0]='NAME';}
+  if( hovered.address && hovered.address != ' ' ){ address = hovered.address; matched[1]='address';}
+  if( hovered.ADDRESS && hovered.ADDRESS != ' ' ){ address = hovered.ADDRESS; matched[1]='ADDRESS';}
+  let details = renderObject.hover.map( (field, index) => {
+    if(matched[0] && field.name == matched[0] ){ return null }
+    if(matched[1] && field.name == matched[1] ){ return null }
+    let alias = field.alias;
+    return ( "<b>"+ alias +"</b> : "+ hovered[field.name.trim()]+"</br>")
+  } )
+  !name ? null: details.unshift("<b>Given Name</b> : "+name+"</br>")
+  !address ? null: details.unshift("<b>Address</b> : "+address+"</br>")
+  details = details.join('')
+  event.target.bindTooltip(''+details).openTooltip();
+}
 
 export function hoverEvent(event, renderObject ){
   let hovered = event.target.feature.properties;
-  // this is not a smart way of filtering out names/addresses but it gets the job done
   let name = false;
   let address = false;
   let matched = [ false, false]
@@ -222,7 +241,7 @@ export function hoverEvent(event, renderObject ){
 
 //BOUNDARY - HOVER
 export function onBoundryMouseOut (e) {  e.target.setStyle({ weight: 4 }); }
-export function onBoundryHover (event , renderObject){hoverEvent(event, renderObject);}
+export function onBoundryHover (event , renderObject){hoverEventBoundary(event, renderObject);}
 export function onBoundryMouseOver (e, renderObject) {
    onBoundryHover(e, renderObject); 
    e.target.setStyle({ weight: 8 });

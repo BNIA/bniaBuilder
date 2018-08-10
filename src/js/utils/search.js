@@ -87,9 +87,7 @@ export async function getDetails( event, state ){
     let group = dictionary.group ? dictionary.group.replace(/%20/g, '').replace(/\s+/g, '') : 'xyz';
     let subgroup = dictionary.subgroup ? dictionary.group.replace(/%20/g, '').replace(/\s+/g, '') : 'xyz';
     let layerName = dictionary.layer ? dictionary.group.replace(/%20/g, '').replace(/\s+/g, '') : 'xyz';
-    if( (layer.layer == dictionary.layer) && (layer.host == dictionary.host)){ 
-      return false
-    }
+    if( (layer.layer == dictionary.layer) && (layer.host == dictionary.host)){ return false }
     return (connectLayers.includes(group) || connectLayers.includes(subgroup) || connectLayers.includes(layerName))
   } )
   let foreignLayers = []

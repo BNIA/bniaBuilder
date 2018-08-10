@@ -18,6 +18,13 @@ export default class DataTable extends Component {
 		  let revealthese = layer.fields.filter(field => field.search == true).map(field => ({ Header: field.alias, accessor: field.name }))
 		  !Object.values(layer.fields[0]).includes('block_lot') ? null:revealthese.unshift({Header:'Block Lot', accessor:'block_lot'});
 		  !layer.dataWithGeometry[0] ? null : !Object.keys(layer.dataWithGeometry[0].properties).includes('BL') ? null:revealthese.unshift({Header:'Block Lot', accessor:'BL'});
+		  
+		  let whatgoesin = {
+		  	data : transposedObjectArray,
+		  	columns : revealthese
+		  }
+		  console.log(whatgoesin);
+
 		  return ( [
 		    <br key={index+'b'} />,
 		    <h2 key={index+'j'} >{layer.alias}</h2>,
