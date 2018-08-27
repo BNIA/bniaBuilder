@@ -1,38 +1,44 @@
 import {fetchData} from 'js/utils/utils';
 
+/*
+Inputs : SheetID, 
+Outputs : take a Google Sheet ID and return a configuration doc
+*/
 export async function getSheets(sheetsUrlKey){
   let sheetsUrl = 'https://spreadsheets.google.com/feeds/list/'+sheetsUrlKey+'/';
   let sheetNumber = 1;
   let sheetsData = [];
   let sheetUrl = '';
   let sheetData = [];
+  let layersIndex = 4;
+  let fieldsIndex = 5;
   if (sheetsUrlKey == 'null'){ return null }
+
+  // Get sheets
   do {
     sheetUrl = sheetsUrl + sheetNumber + "/public/values?alt=json";
-    //console.log(sheetUrl);
     sheetData = await readSpreadsheet(sheetUrl);
-    //console.log(sheetData.title);
-    //console.log(sheetData);
-    //console.log('sheetsData ^ ');
+    layersIndex = sheetData.title == 'layers' ? sheetNumber-1 : layersIndex;
+    fieldsIndex = sheetData.title == 'fields' ? sheetNumber-1 : fieldsIndex;
+    //console.log(sheetUrl); //console.log(sheetData.title); //console.log(sheetData); //console.log('sheetsData ^ ');
     (sheetData != 'error') ? (sheetNumber++, sheetsData.push(sheetData) ) : sheetNumber = 'NaN'
-  }
-  while( typeof(sheetNumber) == 'number' &&  sheetNumber < 7 )
-  // Stuff the Fields into the Layers. The index is hard codeded. This could be moved into the first sheet.
-  let layers = sheetsData[4];
-  let fields = Object.keys(sheetsData[5]['entry']).map(function (key) { return sheetsData[5]['entry'][key]; });
+  } while( typeof(sheetNumber) == 'number' &&  sheetNumber < 7 )
+
+  // Insert Fields into Layers.
+  let layers = sheetsData[layersIndex];
+  let fields = Object.keys(sheetsData[fieldsIndex]['entry']).map(function (key) { return sheetsData[fieldsIndex]['entry'][key]; });
+
+  // Group the Fields
   let groupedFields = groupBy(fields, function(item) { return [item.key]; });
-  //console.log('fields');
-  //console.log(fields);
-  //console.log('groupedFields');
-  //console.log(groupedFields);
+  
   Object.keys(layers['entry']).map(function(layer) {
     let fields = groupedFields.filter(function(group) { return group[0]['key'] == layers['entry'][layer]['key'] ? group : null });
     layers['entry'][layer]['fields'] = fields[0];
   } )
-  // Delete the fields object, update layers
-  sheetsData.splice(4, 2, layers);
+  sheetsData = sheetsData.filter( x => x.title != 'fields' )
   return sheetsData;
 }
+
 
 async function readSpreadsheet(url){
   // Gather Sheet Information

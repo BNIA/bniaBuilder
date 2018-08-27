@@ -2,11 +2,9 @@ import React, {Component} from 'react';
 
 import {fetchData} from 'js/utils/utils';
 
-let hi = fetchData('api/lol.php')
-console.log(hi);
-
 import Body from 'js/components/global/Body';
 import Header from 'js/components/global/Header';
+import Login from 'js/components/global/Login';
 
 import { getSheets } from 'js/utils/sheets'
 import { downloadObjectAsJson } from 'js/utils/utils.js'
@@ -81,8 +79,8 @@ export default class App extends Component {
   async handleRemove(event){
     let key = event.target.dataset.key;
     let dictionaries = this.state.dictionaries;
-    let layer = dictionaries.filter(function(k) { return k.key === key  })[0];
-    delete layer['dataWithGeometry'];
+    let layer = dictionaries.filter(layer => { return layer.key == key  })[0];
+    delete layer['dataWithCoords'];
     this.setState( {
       dictionaries,
       'event': 'handleRemove'
@@ -92,35 +90,36 @@ export default class App extends Component {
   // Download the google spreadsheet
   async getSheets(event){
   	event.preventDefault();
-  	console.log('getsheets');
+  	console.log('Get Sheets');
     let target = event.target;
-    console.log(target);
     let dropdowns = target.getElementsByTagName('select')
-    let haha = await getSheets( dropdowns[0].value );
-    if( haha == null){return null}
+    let resp = await getSheets( dropdowns[0].value );
+    if( resp == null){return null}
     else{
-      console.log(haha);
       let newState = {}
-      haha.map( sheet => {
-      	newState[sheet.title] = sheet.entry
-      } )
+      resp.map( sheet => { newState[sheet.title] = sheet.entry } )
       let filledDictionaries = await fillDictionaries(newState.layers);
+      console.log(filledDictionaries);
       newState.dictionaries = filledDictionaries;
       delete newState.layers;
-      setTimeout(function(){
-      	 downloadObjectAsJson( newState, 'json_config' ) 
-      }, 3000);
+      downloadObjectAsJson( newState, 'json_config' );
     }
   }
 
   // Toggles Text to Speach
   async componentDidMount(){ 
+    let userLogin = this.state.configuration.userLogin;
+    let loginRequired = this.state.configuration.loginRequired;
+    if(userLogin && loginRequired){
+      console.log('LOGIN REQUIRED');
+    }
+    console.log(loginRequired);
+
     this.state.configuration.speech ? await import('js/utils/annyang.min.js') : ''; 
     const BigModal = !this.state.configuration.showAllRecordsBtn ? false : await import('js/components/global/BigModal');
     this.setState( { BigModal : BigModal.default } )
   }
   render () {
-    console.log(this.state);
     if (navigator.appName == 'Microsoft Internet Explorer' || !!(navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/))){ alert("Please dont use IE."); }
     
     // These functions are crucial for the app to work.
@@ -139,7 +138,6 @@ export default class App extends Component {
     if(this.state.details && this.state.configuration.showAllRecordsBtn && this.state.BigModal){ 
 	  bigModal = <this.state.BigModal state={this.state}/> 
 	}
-
     return (
     <div style={merge}>
       {bigModal}

@@ -1,16 +1,4 @@
 import React, {Component} from 'react';
-
-//Array.from()
-//myElement.classList.toggle('some-class')
-//el.classList.toggle('some-orange-class', theme === 'orange'); //conditional
-//myElement.closest('article').querySelector('h1'); // get h1 from nearest article in parents
-//if (myElement.matches('.some-class')) {
-//if (!modalEl.contains(e.target)) modalEl.hidden = true;
-// document.getElementById("myDialog").showModal() 
-//https://codepen.io/giuseppesalvo/pen/wrYrVb
-//https://codepen.io/sdurphy/pen/dPpawz
-
-import Worker from 'js/utils/Worker.worker.js'
 import Form from 'js/components/local/Form.js'
 
 // Input : Layer, state, stateFunctions
@@ -24,35 +12,59 @@ export default class Details extends Component {
     this.state = {
       form : false,
       prepairedData : false,
-      update : false,
     }
     this.giveDescription = this.giveDescription.bind(this);
   }
 
-  // on keypress, while checking to see if an the component should rerender also construct the item to rerender.
+  // on keypress, check to see if a component rerenders, also construct the item to rerender.
   componentDidMount(){ this.updateForm( ) }
   componentWillReceiveProps(nextProps){ this.updateForm( ) }
 
   // Prepare the Form
   async updateForm( ){
-    let newWorker = new Worker()
-    newWorker.postMessage({'cmd': 'prepareSuggestions', 'msg': this.props.layer });
-    newWorker.onmessage = async (m) => {    
-      let update = true;
-      if( update ){ this.setState( { 'prepairedData' : m.data.prepairedData, 'update' : true } ) } 
-      else{ this.setState( { 'update' : false } ) } 
-    }
-    newWorker.terminate();
+    // START - Translate Array->Object(key:value) Object->(key:array)
+    let layer = this.props.layer;
+    let update = false;
+    let suggestions = layer.fields.map( (field, i) => {
+      if ( !field || field.filter == false ){ return [] }
+
+      let prepSug = field.preloadfilter ? field.preloadfilter : false ;
+      prepSug = ( !prepSug && layer['currentFormsData'] ) ? layer['currentFormsData'] : prepSug;
+      if(typeof(prepSug) == 'boolean'){ return [] }
+      // Format The Suggestion Accordingly
+      let suggestions = prepSug.map( (suggestion, i) => {
+        if ( layer.host == 'bniaApi'){ 
+          if( suggestion.block_lot ){ suggestion = suggestion[field.name.trim()] }
+        }
+        if ( layer.host == 'arcgis' ){
+          if(suggestion && suggestion.attributes){
+            suggestion = suggestion.attributes[field.name.trim()] 
+          }
+        }
+        if ( layer.host == 'socrata' ){
+          if(suggestion){ suggestion = suggestion[field.name.trim()] }
+          console.log(suggestion);
+        }
+        return suggestion
+      } )
+
+      var mySet = new Set(); // Filter Distinct Suggestions & Sort Distinct Suggestions
+      let unique = suggestions.filter( x => { var isNew = !mySet.has(x); if (isNew) mySet.add(x); return isNew && (x === 0 || x); });
+      let uniqueAndSorted = unique.sort( (a, b) => { if(a < b){ return -1}; if(a > b){return 1}; return 0; } ) 
+if ( layer.host == 'socrata' ){ console.log(uniqueAndSorted) };
+      return uniqueAndSorted
+    } )
+    this.setState( { 'prepairedData' : suggestions } )
   } 
   
   // RENDER
-  async giveDescription(description){alert(description); }
+  async giveDescription(description){alert(description); } 
   render () {
     const { prepairedData } = this.state;
     const { layer, state, stateFunctions} = this.props;
     
     // Show the 'Remove' Button
-    let removeButton = !layer['dataWithGeometry'] ? false :
+    let removeButton = !layer.dataWithCoords ? false :
       <button className='removeButton fa fa-times'
        onClick={stateFunctions.removed}
        title='Remove Layer'
@@ -78,11 +90,11 @@ export default class Details extends Component {
     // Let the user know how many matches were found.
     let respLen = layer['currentFormsData'] ? layer['currentFormsData'].length : false; let alert = '';
     if( !layer.searchfields ) ''
-    else if( respLen === 0) alert = <p> No Records Found </p>
-    else if( respLen == 1 ) alert = <p> Exact Match! </p>
-    else if( respLen >= 100 ) alert = <p> Top 100 Records by attribute </p>
-    else if( respLen >= 2) alert = <p> {respLen} records found </p>
-    else alert = <p> Enter Query </p>
+    else if( respLen === 0) alert = <p title='Query Hint' className='queryHint'> No Records Found </p>
+    else if( respLen == 1 ) alert = <p title='Query Hint' className='queryHint'> Exact Match! </p>
+    else if( respLen >= 100 ) alert = <p title='Query Hint' className='queryHint'> Top 100 Records by attribute </p>
+    else if( respLen >= 2) alert = <p title='Query Hint' className='queryHint'> {respLen} records found </p>
+    else alert = <p title='Query Hint' className='queryHint'> Enter Query </p>
 
     let layerDescription = layer.layerdescription ? layer.layerdescription : '';
     let infoButton = layerDescription ? '' : '';
@@ -90,9 +102,9 @@ export default class Details extends Component {
      //  onClick={ this.alert() }
      //  title='Description' />;
 
-    return <details>
+    return <details className='detailInnerContent'>
         <summary title={ layerDescription } > {layer.alias} { infoButton }{ removeButton }{ goButton } </summary>
-        <form data-key={layer.key}>
+        <form data-key={layer.key} className='detailInnerContent'>
           { alert }
           <Form layer={layer} stateFunctions={stateFunctions} prepdSug={prepairedData}  /> 
           {searchButton}
@@ -102,32 +114,18 @@ export default class Details extends Component {
   }
 }
 
-
-
-
 /*
-      // Always update the first time
-      if( !this.state.prepairedData ){ update = true }
-      else if( !update ){  
-        // check each field
-        let obj = m.data.prepairedData;
-        console.log(obj)
-        Object.keys(obj).map( (key, index) => {
-          ( 
-            ( typeof(this.state.prepairedData[index]) != 'undefined'  ) && 
-            ( obj[index].length != this.state.prepairedData[index].length ) 
-          ) ? update = true : ''
-        } )
-      }
+  // Always update the first time
+  if( !this.state.prepairedData ){ update = true }
+  else if( !update ){  
+    // check each field
+    let obj = m.data.prepairedData;
+    console.log(obj)
+    Object.keys(obj).map( (key, index) => {
+      ( 
+        ( typeof(this.state.prepairedData[index]) != 'undefined'  ) && 
+        ( obj[index].length != this.state.prepairedData[index].length ) 
+      ) ? update = true : ''
+    } )
+  }
 */
-
-
-// PHP install page.
-// Prompt for Database Credentials 
-// Create Database from domains filepath/url whatever mojobojomojoododadjos
-// Create Tables 
-// Create Admin account 
-
-// 1) download code (bnia can provide it as a zip) 
-// 2) goto domain.ext/path/to/file/install to get started 
-// 3) visit the homepage and log in 

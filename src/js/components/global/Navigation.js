@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 const e = React.createElement;
 import Details from 'js/components/local/Details';
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
 
 export default class Navigation extends Component {
@@ -55,18 +56,13 @@ export default class Navigation extends Component {
 		  <option value="1g86NoBd51kQ9svU64rABZep4tcvOqqxOV3Ko53VgiNA">This Site</option>
 		  <option value="1127B86Jm5nKxzbXRVEFR18F0z1Dv3tk6okTkRMZdtJU">Developers</option>
 		</select>
-		<button> Download Spreadsheet </button>
+		<button> Download Spreadsheet </button><br/><br/><br/>
 	  </form>
 	)
-
-
-    let prompt = 
-      <div style={promptStyle}>
-        <p> <b> Please Note : </b> </p>
-        <ul>
-          <li> Searching <b>Property Events</b> and <b>Property Information</b> should take no longer than 10 seconds and yield no more than <u>500 records</u> per request</li>
-        </ul>
-      </div>
+    
+    let navPrompt = this.props.state.configuration.navPrompt;
+    let prompt =  <div>{ ReactHtmlParser(navPrompt) }</div>;
+	// embedded pervasive mobile sensing for mobile 
     // only show tableview if table webadmin set tableview  to true
     let toggleTableView = !state.configuration.dataTable ? prompt : [
       <h3 key='togh3'>Display : </h3>,
@@ -81,6 +77,7 @@ export default class Navigation extends Component {
 	    {downloadgss}
 	    <div id='mainNav'>
 	     <div title='Loading...' className="loader"></div>
+	              <button id='toggle_login'> LOGIN </button>
          {toggleTableView}
 	    </div>
       </aside>
@@ -91,9 +88,8 @@ export default class Navigation extends Component {
 // onClick Event Listener (Mal-Practice) that toggles the Navigation Drawer
 function addNavigationListeners(){
   var navigation_drawer = document.getElementById('navigation_drawer');
-  var toggle_nav = document.getElementsByClassName('toggle_nav');
-    for (var i = 0; i < toggle_nav.length; i++) {
-    toggle_nav[i].addEventListener('click', function(){
+  var toggle_nav = document.getElementById('toggle_nav');
+    toggle_nav.addEventListener('click', function(){
       // Style properties are == '' by default. 
       // Not sure if this segment can be reduced.
 	  if(navigation_drawer.style.display === ''){
@@ -105,5 +101,4 @@ function addNavigationListeners(){
 	    navigation_drawer.style.display = 'none'; 
 	  } else{ navigation_drawer.style.display = 'flex'; }
     });
-  }
 }

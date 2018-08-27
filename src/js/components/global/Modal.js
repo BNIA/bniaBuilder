@@ -49,7 +49,8 @@ class ModalContent extends Component {
       < h2 > { Title } < /h2>
       < h3 style = { SubtitleStyle } > { SubTitle.replace(/_/g, ' ') } < /h3>  
       { innerContents} 
-      < button className = "close_modal" tabIndex = "0" > OK < /button> 
+      <br/>
+      < button className = "toggle_view close_modal" tabIndex = "0" > OK < /button> 
     < / section >
     )
   }

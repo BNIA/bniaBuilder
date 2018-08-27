@@ -1,39 +1,22 @@
-import {fetchData, groupBy, isEmpty} from 'js/utils/utils';
+import {fetchData, groupBy} from 'js/utils/utils';
+import {EsriSearch} from 'js/utils/handles/esriHandle';
 
-// Rertrieve Dictionaries and Buff out your Context
+/*
+Inputs : Recieves the dictionary.layers right from sheets.js' processing
+Outputs : Populates dictionary.layers 
+*/
 export async function fillDictionaries(oldDataSets) {
-  console.log(oldDataSets);
   let dataSets = oldDataSets
-  if(typeof(dataSets)=='undefined'){ return dataSets}
-  // For each Dataset
-  let newData = dataSets.map( async function(dataSet, i){
-    if(typeof(dataSet.host)=='undefined'){ console.log('noHost') }
+  // For each Dataset 
+  let newData = await Promise.all( dataSets.map( async (dataSet, i) => {
     let ending = "?f=pjson";
     // Handle ArcGis
     if (dataSet.host == 'arcgis') {
-      if(typeof(dataSet.provider)=='undefined'){ console.log('noProvider') }
-      if(typeof(dataSet.service)=='undefined'){  console.log('noService') }
-      // getArcGisLayerInfo Function Call
-      let layerInfo = await getArcGisLayerInfo(dataSet);
-      // This is a BNIA ARCGIS thing only.
-      if(!dataSet.alias){
-        let groupings = layerInfo.copyrightText.split(", ");
-        if(groupings.length == 3){
-          dataSet.alias = groupings[2];
-          dataSet.subgroup = groupings[1];
-          dataSet.group = groupings[0];
-        }
-        else if(groupings.length == 2){
-          dataSet.alias = groupings[1];
-          dataSet.subgroup = false;
-          dataSet.group = groupings[0];
-        }
-        else if(groupings.length == 1){
-          dataSet.alias = groupings[0];
-          dataSet.subgroup = false;
-          dataSet.group = false;
-        }
-      }
+      let esriHandler = new EsriHandler();
+      let serviceInfo = await esriHandler.getArcGisServiceInfo(dataSet); // get service
+      dataSet = esriHandler.fixBrokenLinks( dataSet, serviceInfo ); // ensure it's quality
+      let layerInfo = await esriHandler.getArcGisLayerInfo(dataSet, serviceInfo);
+      dataSet = esriHandler.esriCopyrightText(layerInfo, dataSet);
       dataSet.layerdescription = layerInfo.description;
       dataSet.geometryType = layerInfo.geometryType;
       dataSet.drawinginfo = layerInfo.drawinginfo;
@@ -41,77 +24,96 @@ export async function fillDictionaries(oldDataSets) {
     }
     // Handle bniaApi, googleSpreadSheets (doNothing)
     if (dataSet.host == 'bniaApi') { return ( dataSet ) }
+    if (dataSet.host == 'socrata') { return ( dataSet ) }
     if (dataSet.host == 'googleSpreadSheets') { return ( dataSet ) }
-    return ( null )
-  });
-  return dataSets
+    return ( dataSet )
+  } ) )
+  return newData
 }
 
-async function getArcGisLayerInfo(dataSet){
+
+
+
+function EsriHandler(){
+
   // Get Service Information
-  let serviceUrl = 'https://services1.arcgis.com/' 
-    + dataSet.provider + '/ArcGIS/rest/services/'
-    + dataSet.service +'/FeatureServer';
-  let layerUrl = 'https://services1.arcgis.com/' 
-    + dataSet.provider + '/ArcGIS/rest/services/'
-    + dataSet.service +'/FeatureServer/'+dataSet.layer;
-  console.log(serviceUrl);
-  let serviceInformation = await fetchData(serviceUrl + '?f=pjson');
-  let layerInformation = await fetchData(layerUrl + '?f=pjson');
-  let layer = {};
-  //console.log(layerUrl);
-  //console.log(serviceUrl);
-  layer['serviceInformation'] = serviceInformation.serviceDescription
-  //layer['name'] = layerInformation.name
-  // Determines what gets painted and how
-  console.log(serviceInformation);
-  layer['geometryType'] = serviceInformation.layers[dataSet.layer].geometryType
-  // Paint Points
-  layer['drawinginfo'] = layerInformation.drawingInfo;
-  // Description
-  layer['description'] = layerInformation.description
-  // Group Subgroup Label
-  layer['copyrightText'] = layerInformation.copyrightText
+  this.getArcGisServiceInfo = async dataSet => {
+    let serviceUrl = 'https://services1.arcgis.com/' 
+      + dataSet.provider + '/ArcGIS/rest/services/'
+      + dataSet.service +'/FeatureServer';
+    return await fetchData(serviceUrl + '?f=pjson');
+  }
 
-  // For each Field in the ARCGIS Layer
-  let usableFields = layerInformation.fields.filter( function(field, i) {
-    // return the arcGis Field if can be found matching a field from our Dictionary
-    let arcGisField = field.name.toUpperCase().trim();
-    var dataSetField = dataSet.fields.map(function(e) { return e.name.toUpperCase().trim(); })
-    let exists = dataSetField.indexOf( arcGisField )
-    return exists >= 0 ? true : false;
-  } );
-  let fieldInformation = usableFields.map( async function(field, i) {
-    var dataSetField = dataSet.fields.map(function(e) { return e.name.toUpperCase(); }).indexOf(field.name.toUpperCase());
-    let mergedField = dataSet.fields[dataSetField];
-    mergedField.alias = field.alias;
-    if(!mergedField.type){  mergedField.type = field.type; }
-    return mergedField.preloadfilter ? await getArcGisFieldDistinctValues(dataSet, mergedField) : mergedField; 
-  } );
-  layer['fields'] = fieldInformation;
-  return layer
+  // Find and replace broken links IFF a user specifies a layername
+  this.fixBrokenLinks = (dataSet, service) => {
+    let ln = dataSet.layername; let sl = service.layers;
+    if( ln && ln != sl[dataSet.layer].name){
+      sl.map( a => { if( a.name == ln ){ dataSet.layer = a.id; } } );
+    } return dataSet
+  }
+
+  // Main Function
+  this.getArcGisLayerInfo = async (layer, serviceInfo) => {
+
+    // Get layer Information
+    let layerUrl = 'https://services1.arcgis.com/' 
+      + layer.provider + '/ArcGIS/rest/services/'
+      + layer.service +'/FeatureServer/'+layer.layer;
+    let esriLayer = await fetchData(layerUrl + '?f=pjson');
+
+    // Write basics to layer
+    layer['serviceInformation'] = serviceInfo.serviceDescription
+    layer['geometryType'] = serviceInfo.layers[layer.layer].geometryType
+    layer['drawinginfo'] = esriLayer.drawingInfo;
+    layer['description'] = esriLayer.description
+    layer['copyrightText'] = esriLayer.copyrightText // gets passed to esriCopyrightText()
+ 
+    // Loop through the Esri Fields
+    let fields = await Promise.all( esriLayer.fields.map( async ( esriField ) => {
+      let index = layer.fields.map(lf=>lf.name).indexOf(esriField.name);
+      if(index == -1){ return null }
+      // If a Specified Field matches an Esri Field
+      let newField = layer.fields[index];
+      newField.alias = newField.alias ? newField.alias : esriField.alias ;
+      if(!newField.type){  newField.type = esriField.type; }
+      // Preload Filter
+      newField['preloadfilter'] = !newField.preloadfilter ? false : await getDistinctEsriVals(layer, newField); 
+      console.log(newField);
+      return newField
+    } ) );
+    fields = fields.filter( f => f != null )
+    console.log(fields)
+    layer['fields'] = fields;
+    return layer
+  }
+
+  // Group Subgroup Label
+  this.esriCopyrightText = (layerInfo, layer) => {
+    if(!layer.alias){
+      let groupings = layerInfo.copyrightText.split(", ");
+      if(groupings.length == 3){
+        layer.alias = layer.alias ? layer.alias : groupings[2];
+        layer.group = layer.group ? layer.group : groupings[0];
+        layer.subgroup = layer.subgroup ? layer.subgroup : groupings[1];
+      }
+      else if(groupings.length == 2){
+        layer.alias = layer.alias ? layer.alias : groupings[1];
+        layer.group = layer.group ? layer.group : groupings[0];
+        layer.subgroup = layer.subgroup ? layer.subgroup : false;
+      }
+      else if(groupings.length == 1){
+        layer.alias = layer.alias ? layer.alias : groupings[0];
+        layer.group = layer.group ? layer.group : false;
+        layer.subgroup = layer.subgroup ? layer.subgroup : false;
+      }
+    }
+    return layer
+  }
 }
 
-async function getArcGisFieldDistinctValues(dataSet, field){
+// get distinct field values from arcGis
+async function getDistinctEsriVals(layer, field){
   let flag = false;
-  let root = 'https://services1.arcgis.com/' + dataSet.provider + '/ArcGIS/rest/services/' + dataSet.service + '/FeatureServer/' + dataSet.layer + '/query?';
-  
-  // Total Number Of Records
-  let totalNumberofRecords = root + 'where=1%3D1&returnCountOnly=true&f=pjson';
-  totalNumberofRecords = await fetchData(totalNumberofRecords).then(json => { return json.count });
-  // Get Actual data. Calling as many times as we need to. 
-  let allRecords = [];
-  do{
-    //"+dataSet.primarykey+"+
-    let queryString = root + "where=1%3D1&returnGeometry=false&outFields="+field.name+"&resultOffset%3D" + allRecords.length + "&returnDistinctValues=true&f=pjson"
-    let response = await fetchData(queryString).then(json => { if(json != undefined){ return json.features } return null });
-    if (response != null){ allRecords = allRecords.concat(response) }
-    console.log(dataSet);
-    console.log('Queried : ' + queryString, response)
-    if( response.length < 1000 ){ flag = true; }
-  }
-  while( flag == false );
-  field['data'] = allRecords;
-  field['db'] = allRecords;
-  return field;
+  let obj=new EsriSearch(layer)
+  return await obj.getPreloads(field)
 }

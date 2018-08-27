@@ -18,7 +18,27 @@ export class SocrataSearch extends Cannonical {
   // Get Suggestions  --> Has yet to be constructed
   //
   async getSuggestions(fieldValuePairs) { 
-    console.log('getSuggestions');
+    console.log(fieldValuePairs);
+    let query = this.root+'?$where=';
+    let firstItem = true;
+    Object.keys(fieldValuePairs).map( key => {
+      if(!firstItem){ query += '&'; }
+      firstItem=false;
+      query += key + '%20like%20%27%25'+ fieldValuePairs[key] +'%25%27';
+    } )
+    query += '&$limit=100';
+    let serverReturnedThis = await fetchData(query);
+    console.log('Operation : DgetSuggestionsistinct , Query Sent : ', query, ', Server Returned :', serverReturnedThis);
+    
+    return serverReturnedThis;
+  }
+
+  //
+  // Get Records -> Similar to getSuggestions, however here we want to get everything matching our record 
+  // https://dev.socrata.com/docs/functions/count.html
+  //
+  
+  async getRecords(fieldValuePairs) { 
     console.log(fieldValuePairs);
     let query = this.root+'?$where=';
     let firstItem = true;
@@ -28,23 +48,9 @@ export class SocrataSearch extends Cannonical {
       query += key + '%20like%20%27%25'+ fieldValuePairs[key] +'%25%27';
     } )
     let serverReturnedThis = await fetchData(query);
-    console.log('Operation : Distinct , Query Sent : ', query, ', Server Returned :', serverReturnedThis);
-    return serverReturnedThis.features.map( (feature) => feature.attributes[field.name] );
+    console.log('Operation : getRecords , Query Sent : ', query, ', Server Returned :', serverReturnedThis);
+    
+    return serverReturnedThis;
   }
-
-  //
-  // Get Records -> Similar to getSuggestions, however here we want to get everything matching our record 
-  //
-  async getRecords(fieldValuePairs) {
-    console.log('getRecords');
-    console.log(fieldValuePairs);
-  }
-  //
-  //  Connect between Records
-  //
-  // This will search for all the information pertaining to a blocklot.
-  async connect(props) {
-   console.log('connect');
-   console.log(fieldValuePairs);
-  }
+  
 }

@@ -29,7 +29,7 @@ export default class BigModal extends Component {
     let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
     let [lng, lat] = coordinates;
     // Street View
-    let styleContainer = { width: '50%', margin: 'auto' }
+    let styleContainer = { width: '50%', margin: 'auto', align : 'center' }
     let styleBtn = { width: '50px', height: '50px', border: '1px solid black', margin: '5px', borderRadius: '5px' }
     let streetViewApiKey = "&fov=100&heading=" + this.state.heading + "&pitch=10&key=AIzaSyBwEaG4Uj2rUeM5sjHPUobnUPQz_jHuq9s";
     let streetViewApiURL = "https://maps.googleapis.com/maps/api/streetview?size=800x600&location=";
@@ -66,7 +66,7 @@ export default class BigModal extends Component {
             <br/>
             <a href={linkToGSV} style={{color:'blue',textDecoration:"underline"}} target="_blank" rel="noopener noreferrer" >StreetView</a>
             <br/>
-            < img align = "center" style = { styleContainer } src = { googleStreetViewSrc } /> 
+            < img alt="Google Street View Image" style = { styleContainer } src = { googleStreetViewSrc } /> 
             < div align = "center" > 
               <p key={'givenName'}>{givenName}</p>
               < button style = { styleBtn } onClick = { () => this.rotateView(-45) } > Left < /button> 
@@ -78,12 +78,16 @@ export default class BigModal extends Component {
             { clickedDetails }
             { controller }
           < /details> 
-		  < button  id='toggle_view' className = "close_big_modal" tabIndex = "0" > OK < /button> 
+		  < button className = "toggle_view close_big_modal" tabIndex = "0" > OK < /button> 
 		< / section >
       < /div >
     );
   }
 }
+
+// CloseModalBtn
+//toggleview -> TableBtn, MapBtn
+//openbigmodal -> OpenBigModal
 
 // Onclick Event Listener to remove AND open the Modal
 function addModalListeners(){

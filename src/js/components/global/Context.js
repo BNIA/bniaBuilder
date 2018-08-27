@@ -70,7 +70,7 @@ export default class Context extends Component {
     if (details) {
 	  // BigModal button
 	  if(state.configuration.showAllRecordsBtn){ 
-	    modalButton = <button className='open_big_modal' > Show All </button> 
+	    modalButton = <button className='toggle_view open_big_modal' > Show All </button> 
 	  }
 
       // Download Details
@@ -93,6 +93,8 @@ export default class Context extends Component {
       controller = DetailsPane( details, sortedForiegnLayers);
 
     }
+    let underline = {width:'100%', height:'2px', background:'black'}; 
+    underline = <div style={underline}> </div>;
     return (
       < aside id = 'context_drawer' > 
         < section id = 'right-drawer' > 
@@ -102,13 +104,14 @@ export default class Context extends Component {
             <br/>
             <a href={linkToGSV} style={{color:'blue',textDecoration:"underline"}} target="_blank" rel="noopener noreferrer" >StreetView</a>
             <br/>
-            < img align = "center" style = { styleContainer } src = { googleStreetViewSrc } /> 
+            < img alt="Google Street View Image"  align = "center" style = { styleContainer } src = { googleStreetViewSrc } /> 
             < div align = "center" > 
               <p key={'givenName'}>{givenName}</p>
               < button style = { styleBtn } onClick = { () => this.rotateView(-45) } > Left < /button> 
               < button style = { styleBtn } onClick = { () => this.rotateView(45) } > Right < /button> 
             < / div > 
-          < /details> 
+          < /details>
+          {underline}
           < details open key = { 'contexDetail12' } > 
             < summary > Details < /summary > 
             <p> First Record will be shown </p>
@@ -116,6 +119,7 @@ export default class Context extends Component {
             { controller } 
             { modalButton }{ download }
           < /details> 
+          {underline}
           < details open key = { 'contexDetail13' } > 
             < summary > Discussion  < /summary > 
             <ReactDisqusComments
@@ -125,6 +129,7 @@ export default class Context extends Component {
               url= {disqusUrl}
               onNewComment={this.handleNewComment}/>
           < /details> 
+          {underline}
         < / section > 
       < /aside>
     )

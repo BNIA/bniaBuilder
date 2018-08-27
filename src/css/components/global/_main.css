@@ -16,11 +16,12 @@ main > section{
 }
 aside {
   padding-top:2px;
-  width: 370px;
   resize: horizontal;
   overflow: hidden;
   display:flex;
   flex-direction: column;
+  justify-content: space-between;
+  background-color: var(--aside_background-color); 
 }
 
 #navigation_drawer section{

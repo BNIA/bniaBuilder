@@ -39,23 +39,21 @@ export default class Header extends Component {
         <menu id='header_menu'>
           <Modal modal={state.modals} appName={state.configuration.longName}/>
           <figure> 
-            <img src={location} title={'Logo Image'} className="hidden-md-down" alt={logo} style={style} /> 
+            <img alt={logo + 'logo'} src={location} title={'Logo Image'} className="hidden-md-down" style={style} /> 
           </figure>
           { menuContent }
         </menu>
-
         <nav id='global_navigation' className="global_navigation" role="navigation" aria-label="global_navigation">
-          <button title={'Toggle navigation'} className='toggle_nav'>
+          <button title={'Toggle navigation'} id='toggle_nav'>
             <div className='fa fa-bars'></div>
               {navigationLabel}
           </button>
         </nav>
-
         <figure> 
-          <img title={'Site Name'} src={location} className="hidden-md-up" alt={logo} width="50px" height="50px"/> 
+          <img  alt={logo+'logo'} title={'Site Name'} src={location} className="hidden-md-up" width="50px" height="50px"/> 
           <small title={'Site Name'} className="hidden-md-down">{longName}</small>  
         </figure>
-
+        <div title='Loading...' className="loader"></div>
         <button title={'Toggle Menu'} id='toggle_header_menu'> Menu </button>
       </header>
     )

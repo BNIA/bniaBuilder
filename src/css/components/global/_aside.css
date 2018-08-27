@@ -11,33 +11,18 @@
 */
 
 #context_drawer{z-index:1;}
-#navigation_drawer{z-index:2;}
+#navigation_drawer{z-index:3;}
 #mainNav{padding:5px}
 /* 
 * Responsive
 */
-@media all and (max-width: 800px) {
-  aside {
-    z-index: 3;
-	position:absolute;
-    bottom:0px;
-    top: 50px;
-    height: stretch-content;
-  }
-  aside, .view_2{ display:none; }
-  #navigation_drawer{ left:0px;  display:none;}
-  #context_drawer{ right: 0;  display:none;}
-}
-@media all and (max-width: 599px) {
-  .hidden-sm-down { display:none!important }
-  aside { width: 100vw; }
-}
-@media all and (max-device-width: 801px) {
-  aside { border: none; }
-  #context_drawer { display:none; }
-  #navigation_drawer{ display:none; }
-}
+/* Browser takes up over 60% of the screen */
 @media all and (min-width: 801px) {
+  aside {
+    min-width:300px;
+    width: 25%;
+    max-width:400px;
+  }
   #context_drawer, .view_2{ display:none; }
   #navigation_drawer{
     height: 100%;
@@ -55,58 +40,107 @@
     padding-bottom:12px;
   }
 }
-
+/* Browser uses less than 60% of the screen but more than 25% */
+@media all and (max-width: 800px) {
+  aside {
+    width: 100%;
+    max-width:350px;
+    z-index: 4;
+	position:absolute;
+    bottom:0px;
+    top: 50px;
+    height: stretch-content;
+  }
+  aside, .view_2{ display:none; }
+  #navigation_drawer{ left:0px;  display:none;}
+  #context_drawer{ right: 0;  display:none;}
+}
+/* Browser is the smallest it can possibely be */
+@media all and (max-width: 599px) {
+  aside {
+    width: 100%;
+    max-width:85%;
+  }
+  .hidden-sm-down { display:none!important }
+  aside { width: 100vw; }
+}
+/* Small Screen */
+@media all and (max-device-width: 801px) {
+  aside { border: none; }
+  #context_drawer { display:none; }
+  #navigation_drawer{ display:none; }
+}
 section.view_2 { overflow: auto }
-
-
-
 
 /* 
 * Buttons
 */
 .DescButton, .GoButton, .removeButton{
   float:right;
-}.searchButton{
+}
+.searchButton{
   padding:5px;
+  margin:5px;
   font-size:20px;
 }
-.fa:active, .DescButton:active, .GoButton:active, .searchButton{
-  background-color: var(--scrollbar-thumb_background-color)
+
+.searchButton, .DescButton, .GoButton, .removeButton{
+  background: var(--toggleView_background);
+  color: var(--toggleView_color);
+  height: 1.5em;
 }
-.fa:hover, .DescButton:hover, .GoButton:hover, .searchButton:hover{
-  background-color: var(--bg-color-1);
+
+.searchButton:hover,
+.DescButton:hover,
+.removeButton:hover,
+.GoButton:hover {
+  background: var(--toggleView_hover_background-color);
+  color: var(--toggleView_hover_color);
 }
-.fa:active, .DescButton:active, .GoButton:active, .searchButton:active{
-  background-color: var(--bg-color-2);
-}
-.fa:focus, .DescButton:focus, .GoButton:focus, .searchButton:focus{
-  background-color: var(--bg-color-2);
+.searchButton:active,
+.DescButton:active,
+.removeButton:active,
+.GoButton:active,
+.searchButton:focus,
+.DescButton:focus,
+.removeButton:focus,
+.GoButton:focus {
+  background: var(--toggleView_actfoc_background-color);
+  color: var(--toggleView_actfoc_color);
 }
 
 
 .toggle_context_drawer{
   display: none;
   position: absolute; 
-  z-index:4;
+  z-index:2;
   right: 0;
   padding: 10px; 
-  background-color: var(--section_background-color);
+  color : var(--context_drawer_toggle_color);
+  background-color: var(--context_drawer_toggle_background);
 }
-
-.toggle_view, .close_modal, .open_big_modal, .close_big_modal,
-#showall, .downloadall, .toggle_view{
+.toggle_context_drawer:hover{
+  color : var(--context_drawer_toggle_hover_color);
+  background-color: var(--context_drawer_toggle_hover_background);
+}
+.toggle_context_drawer:active,
+.toggle_context_drawer:focus{
+  color : var(--context_drawer_toggle_actfoc_color);
+  background-color: var(--context_drawer_toggle_actfoc_background);
+}
+.toggle_view{
   min-height:50px;
   padding: 5px 10px;
   margin: 5px auto;
-  font-size: var(--aside-show-button);
+  font-size: var(--toggleView_font-size);
   font-weight: bold;
   text-decoration: none;
   cursor: pointer;
   border-radius: 15px;
-  color: var(--filter_toggleView_closeModal_color);
-  background: var(--filter_toggleView_background);
-  border :  var(--filter_toggleView_closeModal_border);
-  box-shadow: var(--filter_toggleView_closeModal_box-shadow);
+  color: var(--toggleView_color);
+  background: var(--toggleView_background);
+  border :  var(--toggleView_border);
+  box-shadow: var(--toggleView_box-shadow);
 
   min-width:50px;
   height: 50px; 
@@ -114,24 +148,28 @@ section.view_2 { overflow: auto }
   margin: 5px; 
   border-radius: 5px;
 }
-.downloadall{background:none}
+/* HOVER / FOCUS BUTTONS */
+.toggle_view:hover{
+  color: var(--toggleView_hover_color);
+  background-color : var(--toggleView_hover_background-color);
+  box-shadow: var(--toggleView_hover_focus_box-shadow);
+}
 
-/* Put a better label on this */
-.close_big_modal:hover, .close_big_modal:focus,
-.open_big_modal:hover, .open_big_modal:focus,
-#filter:hover, #filter:focus,
-#close_modal:hover, .close_modal:focus,
-.toggle_view:hover, .toggle_view:focus{
-  color: var(--hover_focus_color);
-  box-shadow: var(--hover_focus_box-shadow);
+/* ACTIVE BUTTONS */
+.toggle_view:active, .toggle_view:focus {
+  color: var(--toggleView_actfoc_color);
+  background-color: var(--toggleView_actfoc_background-color);
+  border :  var(--toggleView_actfoc_border);
+  box-shadow: var(--toggleView_actfoc_box-shadow);
 }
-.open_big_modal:active, .close_big_modal:active, .close_modal:active,
-#filter:active, .toggle_view:active {
-  color: var(--active_color);
-  border :  var(--active_border);
-  background-color: var(--active_background-color);
-  box-shadow: var(--active_box-shadow);
+
+/*Misc*/
+.downloadall{
+  background : none;
+  font-size : 12px;
+  padding : 15px;
 }
+.queryHint {  padding : 5px; }
 /*
    _____                                            
   / ____|                                           
@@ -145,6 +183,7 @@ section.view_2 { overflow: auto }
   line-height:1.5rem;
 */
 
+/* GENERIC DETAILS THINGS */
 summary{
   font-weight: 400;
   text-align: left;
@@ -157,67 +196,142 @@ summary:hover{
   font-weight: 500; 
 }
 details{
+  background-color: var(--details_background-color);
   font-size: var(--details-font_size);
   padding: 0px;
 }
-details ul{
+.detailInnerContent > label {
+  text-align: left;
   padding-left: 10px;
 }
-details li {
-  text-align: left;
-  display :	block;
-  font-weight: 600;
+details[open] > .detailInnerContent {
+  animation-name: invisiblyGrowFontSize;
+  animation-duration: 200ms;
+  animation-delay: 0ms;
+}
+.formField{
+  text-align:left;
+  float: left;
+  width:100%;
+}
+.formField > label { 
+  margin-left: 15px;
+  display: inline-block;
+}
+.formField > input {
+  float: right;
+  margin-right:15px;
+  background-color : white;
+}
+.formField > select {
+  float: right;
+  margin-right:15px;
+  background-color : white;
+}
+form.detailInnerContent {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+/* This makes prettier transitions */
+@keyframes invisiblyGrowFontSize {
+  0% { opacity: 0; }
+  100% {  opacity: 1; }
 }
 
-section > details[open]> summary:focus,
-section > details[open]> summary:hover,
-section > details[open]> summary{
-  border: var(--section_details_summary_open_border)
-}
 
-section > details> summary:focus,
-section > details> summary:hover,
-section > details> summary{
-  border: var(--section_details_summary_closed_border)
-}
 
-aside{ 
-  justify-content: space-between;
-  background-color: var(--aside_background-color); 
-}
-aside > section {
-  min-height : 250px;
-}
 
 /* Details Layer 3 */
+section > details > details > details > summary::-webkit-details-marker { display: none; }
+section > details > details > details > summary:hover {  /* hover */
+  color: var(--details_details_summary_color_hover);
+  background-color: var(--details_details_summary_background_hover_color);
+}
+section > details > details > details > summary:focus{  /* actfoc */
+  color: var(--details_details_summary_color_actfoc);
+  background-color: var(--details_details_summary_background_actfoc_color);
+}
 section > details > details > details > summary{
-  background-color: var(--section_details_details_details_summary_background-color);
+  background-color: var(--details_details_details_summary_background-color);
   position: sticky;
   top: 72px;
   z-index:1;
+  padding-top: .5em;
+  padding-bottom:.5em;
+  border-left-style: solid;
+  border-left-width: .5em;
+  border-left-color: var(--details_details_summary_background-color); /* LEFT BORDER IS COLOR OF PARENT SUMMARY*/
+  transition: background 200ms, color 200ms;
 }
 section > details > details > details{
   padding-bottom: 2px;
-  margin-left:15px;
 }
 
+
+
+
+
+
+
 /* Details Layer 2 */
+section > details > details > summary::-webkit-details-marker { display: none; }
+section > details > details > summary:hover {  /* hover */
+  color: var(--details_details_summary_color_hover);
+  background-color: var(--details_details_summary_background_hover_color);
+}
+section > details > details > summary:focus{  /* actfoc */
+  color: var(--details_details_summary_color_actfoc);
+  background-color: var(--details_details_summary_background_actfoc_color);
+}
 section > details > details > summary{
-  background-color: var(--section_details_details_summary_background-color);
+  color: var(--details_details_summary_color);
+  background-color: var(--details_details_summary_background-color);
   position: sticky;
   top: 30px;
   z-index:2;
+  padding:.25em;
+  transition: background 200ms, color 200ms;
 }
-section > details > details{}
+section > details > details{
+  border-left-style: solid;
+  border-left-width: .5em;
+  border-left-color: var(--details_summary_background-color); /* LEFT BORDER IS COLOR OF PARENT SUMMARY*/
+}
+
+
+
+
+
+
 
 /* Details Layer 1 */
 section > details > summary::-webkit-details-marker { display: none; }
-section > details > summary:hover{ color: var(--section_details_summary_hover_color); }
-section > details > summary{
+section > details > summary:hover {  /* hover */
+  color: var(--details_summary_color_hover);
+  background-color: var(--details_summary_background_hover_color);
+}
+section > details > summary:focus{  /* actfoc */
+  color: var(--details_summary_color_actfoc);
+  background-color: var(--details_summary_background_actfoc_color);
+}
+section > details > summary{ /* summary default  */
+  color: var(--details_summary_color);
+  background-color: var(--details_summary_background-color);
   position: sticky;
   top: 0px;
   z-index:3;
-  background-color: var(--section_details_summary_background-color);
-  line-height: var(--section_details_summary_line-height);
+  padding:.5em;
+  transition: background 200ms, color 200ms;
 }
-section > details{background-color: var(--section_details_background-color);}
+
+section > details[open]> summary:active,  /* open summary lvl 1 */
+section > details[open]> summary:focus,
+section > details[open]> summary{
+  border: var(--details_summary_open_border);
+}
+
+section > details> summary:focus,
+section > details> summary:active,
+section > details> summary{   /* closed summary lvl 1  */
+  border: var(--details_summary_closed_border);
+}

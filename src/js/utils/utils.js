@@ -13,6 +13,7 @@ export function sortDictionaries(dictionaries) {
 }
 function sortByValue( dictionaries, key ){
   // Get Unique Key Values.
+  //console.log(dictionaries, key)
   let uniqueGroupNames = [...new Set( dictionaries.map( dictionary => dictionary[key] )  )];
   // If a dictionary matches the key then append it to that group.
   return uniqueGroupNames.map(uniqueGroupName =>
@@ -23,7 +24,7 @@ function sortByValue( dictionaries, key ){
 export function SimpleDetails (summary, details) {
   //console.log('Simple Details', summary, details)
   return !summary ? null : (
-    < details key = { summary } >
+    < details key = { summary } className='detailInnerContent'>
       < summary > { summary } < /summary >
       { details }
     < /details >

@@ -24,8 +24,12 @@ export default class Form extends Component {
         <Datalist     key={i+'j'} inputChange={stateFunctions.inputChange} field={field} layer={layer} fieldName={field.name.trim()} suggestions={prepd} />
 
       let descr = !field.description ? 'Search by Field' : field.description;
-      return ( [ <label key={i} title={ descr } > {field.alias} : </label>, input 
-      ] )
+      return (
+        <div key={i} className='formField'> 
+          <label key={i} title={ descr }> {field.alias} : </label>
+          {input}
+        </div>
+      )
     })
     return attempt
   }

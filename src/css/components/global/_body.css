@@ -42,11 +42,13 @@ body {
 }
 #header_menu{ 
   background: var(--header_menu_background);
+  color: var(--header_menu_color);
 }
 header{ 
   width: 100%;
   z-index: 5;
-  background-color: var(--header_background-color);  
+  background: var(--header_background-color);  
+  color: var(--header-color);
   flex: 0 1 auto;
   display: flex;
   flex-flow: row wrap;

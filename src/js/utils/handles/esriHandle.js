@@ -13,14 +13,12 @@ export class EsriSearch extends Cannonical {
   //
   // Get Preloaded Suggestions
   //
-  async getPreloads(layerNameAndFieldName) {
+  async getPreloads( field ) {
     let query = this.root
-      + "where="+this.fieldName
-      +"+like%27%25"+this.filter
-      +'%25%27'+'&outFields='+this.fieldName
+      + "where=1=1&outFields="+ field.name
       + '&returnGeometry=false&returnDistinctValues=true&f=pjson';
     let serverReturnedThis = await fetchData(query);
-    console.log('Operation : Distinct , Query Sent : ', query, ', Server Returned :', serverReturnedThis);
+    // console.log('Operation : Distinct , Query Sent : ', query, ', Server Returned :', serverReturnedThis);
     return serverReturnedThis.features.map( (feature) => feature.attributes[field.name] );
   }
 
@@ -37,7 +35,7 @@ export class EsriSearch extends Cannonical {
       firstItem=false;
       query += field + "+like+%27%25"+ this.cln(value) +"%25%27";
     } )
-
+    
     query = this.root+"where="+query+'&outFields=*&returnGeometry=false&returnDistinctValues=true&f=pjson';
     let serverReturnedThis = await fetchData(query);
     serverReturnedThis = serverReturnedThis.features;
@@ -45,43 +43,51 @@ export class EsriSearch extends Cannonical {
     console.log('Operation : Suggetions, Query Sent : ', query, ', Server Returned :', serverReturnedThis);
     return serverReturnedThis
   }
-
   //
   // Get Records -> Similar to getSuggestions, however here we want to get everything matching our record 
   //
   async getRecords(fieldValuePairs) {
-    let firstItem = true;
-    let query = ''
+
+    // Prepare the Query
+    let firstItem = true; 
+    let sqlQuery = '';
     Object.keys(fieldValuePairs).map( field => {
       let value = fieldValuePairs[field]
-      if(!firstItem){ query += '+AND+' }
+      if(!firstItem){ sqlQuery += '+AND+' }
       firstItem=false;
-      query += field + "+like+%27%25"+ this.cln(value) +"%25%27";
-    } )
-    // If no fieldValuesexist.
-    if(firstItem){ query = "1=1" }
-    query = this.root+"where="+query+'&outFields=*&outSR=4326&returnGeometry=true&f=pjson';
-    let serverReturnedThis = await fetchData(query);
-    console.log(query);
-    serverReturnedThis = serverReturnedThis.features;
-    let returnThis = serverReturnedThis.map( record => {
-        console.log(record)
-        var outGeoJson = {}
-        outGeoJson['properties'] = record.attributes;
-        outGeoJson['type']= "Feature";
-        if(record['geometry'] && record['geometry']['x']){
-          outGeoJson['geometry']= {"type": "Point", "coordinates": [record['geometry']['x'], record['geometry']['y']] }
-        }
-        else if(record['geometry'] && record['geometry']['rings']){
-          outGeoJson['geometry']= {"type": "Polygon", "coordinates": record['geometry']['rings'] }
-        }
-        else{
-          outGeoJson['geometry']= {"type": "Point", "coordinates": [undefined,undefined] }
-        }
-        return outGeoJson
+      sqlQuery += field + "+like+%27%25"+ this.cln(value) +"%25%27";
+    } ) 
+    if(firstItem){ sqlQuery = "1=1" }
+    // Check the size of the response
+    let recordCount = this.root + 'where='+sqlQuery+'&returnCountOnly=true&f=pjson';
+    recordCount = await fetchData(recordCount).then(json => { return json.count });
+    let allRecords = [];
+    do{
+      let query = this.root+'where='+sqlQuery+"&resultOffset=" + allRecords.length +'&outFields=*&outSR=4326&returnGeometry=true&f=pjson';
+      let serverReturnedThis = await fetchData(query);
+      serverReturnedThis = serverReturnedThis.features;
+      let returnThis = serverReturnedThis.map( record => {
+          var outGeoJson = {}
+          outGeoJson['properties'] = record.attributes;
+          outGeoJson['type']= "Feature";
+          if(record['geometry'] && record['geometry']['x']){
+            outGeoJson['geometry']= {"type": "Point", "coordinates": [record['geometry']['x'], record['geometry']['y']] }
+          }
+          else if(record['geometry'] && record['geometry']['rings']){
+            outGeoJson['geometry']= {"type": "Polygon", "coordinates": record['geometry']['rings'] }
+          }
+          else{
+            outGeoJson['geometry']= {"type": "Point", "coordinates": [undefined,undefined] }
+          }
+          allRecords.push(outGeoJson);
+          return outGeoJson
       } );
-    console.log('Operation : getRecords, Query Sent : ', query, ', Server Returned :', returnThis);
-    return returnThis
+      console.log('Operation : getRecords, Query Sent : ', query, ', Server Returned :', returnThis);
+    }
+    while( allRecords.length < recordCount );
+
+    console.log('Operation : getRecords, Returned :', allRecords);
+    return allRecords
   }
 
   //

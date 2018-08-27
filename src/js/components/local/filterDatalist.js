@@ -35,7 +35,7 @@ export class Datalist extends Component {
     let { inputChange, fieldName, layer} = this.props;
         
     return [
-        <input key='1' list={fieldName} placeholder='Enter Text' onChange={inputChange} data-field={fieldName} />,
+        <input key='1' list={fieldName} placeholder='Enter Text' onChange={inputChange}  autoComplete={'off'} data-field={fieldName} />,
         <datalist key='2' id={fieldName}> { suggestions } </datalist>
     ]
   }
