@@ -4,6 +4,19 @@ import Details from 'js/components/local/Details';
 import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
 
+/*
+#File: Navigation.js
+#Author: Charles Karpati
+#Date: Feb 2019
+#Section: Bnia
+#Email: karpati1@umbc.edu
+#Description: Toggles Main Views and controller of content. 
+// Dictionaries are sorted for visualization purposes.
+#Purpose: Access 'Map' 'Table' 'Dashboard' views and Perform Queries
+#input: State, State Functions
+#output: Updated State, View
+*/
+
 export default class Navigation extends Component {
   displayName: 'Navigation';
   constructor(props) {
@@ -19,12 +32,12 @@ export default class Navigation extends Component {
   render () {
     const { state, stateFunctions } = this.props;
     let dictionaries = state.dictionaries;
+
     // Map the groups, subgroups and layers into corresponding 'Details' panes
     let controller = sortDictionaries(dictionaries).map( (group, i) => {
       // Layer Stands Alone
       if (group.length == 1 && group[0].length == 1) { 
-        let underline = {width:'100%', height:'2px', background:'black'}; underline = <div key={i+'j'} style={underline}> </div>;
-        return ( [< Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } />, underline] ) 
+        return < Details  key={i} layer = { group[0][0] } state = {state} stateFunctions= { stateFunctions } /> 
       } 
       // Multiple Layers in Group
       let detailContent = group.map( (subgroup, i)=>{
@@ -37,60 +50,63 @@ export default class Navigation extends Component {
         let subgroupContent = subgroup.map( (item, i) => { 
           return < Details  key={i} layer = { item } state={state} stateFunctions={stateFunctions} /> 
         } )
-        return SimpleDetails(subgroup[0]['subgroup'], subgroupContent);
+        return SimpleDetails(subgroup[0]['subgroup'], subgroupContent)
       } )
-      let underline = {width:'100%', height:'2px', background:'black'}; underline = <div key={i+'j'} style={underline}> </div>;
-      return [ SimpleDetails(group[0][0]['group'], detailContent), underline ];
+      return SimpleDetails(group[0][0]['group'], detailContent)
     } )
-    let promptStyle={padding:'10%', width: '80%'}
-    //( sorted by most recent year )
 
-    let downloadit = true;
-    let downloadgss = !downloadit ? '' : (
-      <form onSubmit={stateFunctions.getSheets}>
-		<select>
-		  <option value="null">Select Spreadsheet</option>
-		  <option value="10R29VjJbZhPNR-JBnecKjYMjQI5_r8SU375nMr_xzK4">BOLD</option>
-		  <option value="1PpzuE3dwuXxN8HIckuaK2DbrXEbxOlVrDM5HWsVuDIw">GreenPatterns</option>
-		  <option value="234">BIP</option>
-		  <option value="1g86NoBd51kQ9svU64rABZep4tcvOqqxOV3Ko53VgiNA">This Site</option>
-		  <option value="1127B86Jm5nKxzbXRVEFR18F0z1Dv3tk6okTkRMZdtJU">Developers</option>
-		</select>
-		<button> Download Spreadsheet </button><br/><br/><br/>
-	  </form>
-	)
-    
-    let navPrompt = this.props.state.configuration.navPrompt;
-    let prompt =  <div>{ ReactHtmlParser(navPrompt) }</div>;
-	// embedded pervasive mobile sensing for mobile 
-    // only show tableview if table webadmin set tableview  to true
-    let toggleTableView = !state.configuration.dataTable ? prompt : [
+    // 
+    // Table / Map 
+    // CONNECTS BODY USING DATA-LOCALVIEW 
+    // Dashboard Only on userInfo ( logged in )
+    let prompt = <div>{ ReactHtmlParser( this.props.state.configuration.navPrompt) }</div>;
+
+	let table = !state.configuration.dataTable ? false : <button key='togtab' className='toggle_view' data-localview='table'> Table </button> ;
+	let map = !state.configuration.map ? false : <button key='togmap' className='toggle_view' data-localview='map'> Map </button>;
+	//let dashboard = !state.auth.userInfo ? false : <button key='togdas' className='toggle_view' data-localview='dashboard'> Dashboard </button>;
+	let dashboard = <button key='togdas' className='toggle_view' data-localview='dashboard'> Dashboard </button>;
+	
+	// If more than 3 existt show tabs otherwise show the prompt
+	let count = 0;
+	table ? count++ : false;
+	map ? count++ : false;
+	dashboard ? count++ : false;
+	// console.log('TOGGLE VIEW', table, dashboard, count);
+	// console.log('TOGGLE THIS', state.auth)
+    let toggleTableView = count == 1 ? prompt : [
       <h3 key='togh3'>Display : </h3>,
-      <button key='togtab' className='toggle_view' data-localview='table'> Table </button>, 
-      <button key='togmap' className='toggle_view' data-localview='map'> Map </button>, 
-      ]
-    toggleTableView = state.userHasSearched ? toggleTableView : prompt; // no records no tableview!
-	// RETURN Controls
+      table, map, dashboard
+    ]
+
+
+    // 
+    // Dashboard 
+    // CONNECTS TO SCRIPT IN BODY USES DATA-LOCALVIEW 
+    // Only on userInfo ( logged in ) 
+    // 
+
+	// RETURN Controls  <button id='toggle_login'> LOGIN </button>
     return (
       <aside id='navigation_drawer'>
 	    <section> {controller} </section>
-	    {downloadgss}
 	    <div id='mainNav'>
 	     <div title='Loading...' className="loader"></div>
-	              <button id='toggle_login'> LOGIN </button>
          {toggleTableView}
 	    </div>
       </aside>
     )
   }
 }
-
-// onClick Event Listener (Mal-Practice) that toggles the Navigation Drawer
+/*
+#Description: onClick 'toggle_nav' Event Listener (Mal-Practice) effects the 'navigation_drawer'
+#Purpose: It needs to be done.
+#input: 
+#output: Change in View
+*/
 function addNavigationListeners(){
   var navigation_drawer = document.getElementById('navigation_drawer');
   var toggle_nav = document.getElementById('toggle_nav');
     toggle_nav.addEventListener('click', function(){
-      // Style properties are == '' by default. 
       // Not sure if this segment can be reduced.
 	  if(navigation_drawer.style.display === ''){
 	    if  (window.innerWidth < 801 ){ navigation_drawer.style.display = 'none'; }

@@ -1,55 +1,94 @@
-import {fetchData, groupBy} from 'js/utils/utils';
-import {EsriSearch} from 'js/utils/handles/esriHandle';
+import {fetchData} from 'js/utils/utils'; 
+import {EsriSearch} from 'js/utils/handles/esriHandle'; 
+import {SocrataSearch} from 'js/utils/handles/socrataHandle'; 
+import {BniaSearch} from 'js/utils/handles/bniaHandle'; 
 
-/*
-Inputs : Recieves the dictionary.layers right from sheets.js' processing
-Outputs : Populates dictionary.layers 
+/* 
+Inputs : Recieves the dictionary.layers right from sheets.js' processing 
+Outputs : Populates dictionary.layers for bnia socrata, arcgis 
+
+  -- Arcgis 
+  -- -- Uses 'esriHandler()' class functions
+  -- -- Get Service Information, Fix Broken Links, get Fields Information, get copyrightText
+  -- -- The 'copyrightText' field may be used in esri to specify Group Subgroup and alias Labels
+  -- -- preloadFilter ? getDistinctXYZVals () -> XYZSearch(layer) -> getPreloads(field)
+
+  -- Bnia Api 
+  -- -- preloadFilter ? getDistinctXYZVals () -> XYZSearch(layer) -> getPreloads(field)
+
+  -- Socrata 
+  -- -- does not use preloadFilter because getting distinct values by column in not possible.
+  -- -- currentFormsData can be used instead to populate suggestions by fetching ... data from the set.
+
+  -- Todo : G Spreadsheets - CSV's 
 */
 export async function fillDictionaries(oldDataSets) {
   let dataSets = oldDataSets
   // For each Dataset 
-  let newData = await Promise.all( dataSets.map( async (dataSet, i) => {
+  let newData = await Promise.all( dataSets.map( async (layer, i) => {
     let ending = "?f=pjson";
     // Handle ArcGis
-    if (dataSet.host == 'arcgis') {
+    if (layer.host == 'arcgis') {
       let esriHandler = new EsriHandler();
-      let serviceInfo = await esriHandler.getArcGisServiceInfo(dataSet); // get service
-      dataSet = esriHandler.fixBrokenLinks( dataSet, serviceInfo ); // ensure it's quality
-      let layerInfo = await esriHandler.getArcGisLayerInfo(dataSet, serviceInfo);
-      dataSet = esriHandler.esriCopyrightText(layerInfo, dataSet);
-      dataSet.layerdescription = layerInfo.description;
-      dataSet.geometryType = layerInfo.geometryType;
-      dataSet.drawinginfo = layerInfo.drawinginfo;
-      return dataSet;
+      let serviceInfo = await esriHandler.getArcGisServiceInfo(layer); // get service
+      layer = esriHandler.fixBrokenLinks( layer, serviceInfo ); // ensure it's quality
+      let layerInfo = await esriHandler.getArcGisLayerInfo(layer, serviceInfo);
+      layer = esriHandler.esriCopyrightText(layerInfo, layer);
+      layer.layerdescription = layerInfo.description;
+      layer.geometryType = layerInfo.geometryType;
+      layer.drawinginfo = layerInfo.drawinginfo;
+      return layer;
     }
-    // Handle bniaApi, googleSpreadSheets (doNothing)
-    if (dataSet.host == 'bniaApi') { return ( dataSet ) }
-    if (dataSet.host == 'socrata') { return ( dataSet ) }
-    if (dataSet.host == 'googleSpreadSheets') { return ( dataSet ) }
-    return ( dataSet )
+    // Handle bniaApi
+    if (layer.host == 'bniaApi') { 
+      // Loop through the Bnia Fields
+      let fields = await Promise.all( layer.fields.map( async ( field ) => {
+        // Preload Filter
+        field['preloadfilter'] = !field.preloadfilter ? false : await getDistinctBniaVals(layer, field); 
+        console.log(field);
+        return field
+      } ) );
+      fields = fields.filter( f => f != null )
+      console.log(fields)
+      layer['fields'] = fields;
+      return layer
+    }
+    // Handle socrata
+    if (layer.host == 'socrata') { 
+      layer['currentFormsData'] = await getDistinctSocrataVals(layer, 'null');
+      return layer
+    }
+    // Handle googleSpreadSheets
+    if (layer.host == 'googleSpreadSheets') { 
+      console.log('host = googleSpreadSheets')
+      return ( layer ) 
+    }
+    // Handle CSV
+    if (layer.host == 'csv') { 
+      console.log('host = csv')
+      return ( layer ) 
+    }
+    return ( layer )
   } ) )
   return newData
 }
 
-
-
-
 function EsriHandler(){
 
   // Get Service Information
-  this.getArcGisServiceInfo = async dataSet => {
+  this.getArcGisServiceInfo = async layer => {
     let serviceUrl = 'https://services1.arcgis.com/' 
-      + dataSet.provider + '/ArcGIS/rest/services/'
-      + dataSet.service +'/FeatureServer';
+      + layer.provider + '/ArcGIS/rest/services/'
+      + layer.service +'/FeatureServer';
     return await fetchData(serviceUrl + '?f=pjson');
   }
 
   // Find and replace broken links IFF a user specifies a layername
-  this.fixBrokenLinks = (dataSet, service) => {
-    let ln = dataSet.layername; let sl = service.layers;
-    if( ln && ln != sl[dataSet.layer].name){
-      sl.map( a => { if( a.name == ln ){ dataSet.layer = a.id; } } );
-    } return dataSet
+  this.fixBrokenLinks = (layer, service) => {
+    let ln = layer.layername; let sl = service.layers;
+    if( ln && ln != sl[layer.layer].name){
+      sl.map( a => { if( a.name == ln ){ layer.layer = a.id; } } );
+    } return layer
   }
 
   // Main Function
@@ -70,6 +109,7 @@ function EsriHandler(){
  
     // Loop through the Esri Fields
     let fields = await Promise.all( esriLayer.fields.map( async ( esriField ) => {
+      if( !layer.fields){ console.log(layer, layer.fields) }
       let index = layer.fields.map(lf=>lf.name).indexOf(esriField.name);
       if(index == -1){ return null }
       // If a Specified Field matches an Esri Field
@@ -78,11 +118,11 @@ function EsriHandler(){
       if(!newField.type){  newField.type = esriField.type; }
       // Preload Filter
       newField['preloadfilter'] = !newField.preloadfilter ? false : await getDistinctEsriVals(layer, newField); 
-      console.log(newField);
+      //console.log(newField);
       return newField
     } ) );
     fields = fields.filter( f => f != null )
-    console.log(fields)
+    //console.log(fields)
     layer['fields'] = fields;
     return layer
   }
@@ -113,7 +153,18 @@ function EsriHandler(){
 
 // get distinct field values from arcGis
 async function getDistinctEsriVals(layer, field){
-  let flag = false;
   let obj=new EsriSearch(layer)
+  return await obj.getPreloads(field)
+}
+
+// get distinct field values from arcGis
+async function getDistinctBniaVals(layer, field){
+  let obj=new BniaSearch(layer)
+  return await obj.getPreloads(field)
+}
+
+// get distinct field values from arcGis
+async function getDistinctSocrataVals(layer, field){
+  let obj=new SocrataSearch(layer)
   return await obj.getPreloads(field)
 }

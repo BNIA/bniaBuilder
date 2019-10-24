@@ -94,21 +94,23 @@ section.view_2 { overflow: auto }
 .DescButton:hover,
 .removeButton:hover,
 .GoButton:hover {
-  background: var(--toggleView_hover_background-color);
-  color: var(--toggleView_hover_color);
+  background: var(--toggleView_background_hover);
+  color: var(--toggleView_color_hover);
 }
 .searchButton:active,
 .DescButton:active,
 .removeButton:active,
-.GoButton:active,
+.GoButton:active {
+  background: var(--toggleView_background_active);
+  color: var(--toggleView_color_active);
+}
 .searchButton:focus,
 .DescButton:focus,
 .removeButton:focus,
 .GoButton:focus {
-  background: var(--toggleView_actfoc_background-color);
-  color: var(--toggleView_actfoc_color);
+  background: var(--toggleView_background_focus);
+  color: var(--toggleView_color_focus);
 }
-
 
 .toggle_context_drawer{
   display: none;
@@ -117,16 +119,19 @@ section.view_2 { overflow: auto }
   right: 0;
   padding: 10px; 
   color : var(--context_drawer_toggle_color);
-  background-color: var(--context_drawer_toggle_background);
+  background: var(--context_drawer_toggle_background);
 }
 .toggle_context_drawer:hover{
-  color : var(--context_drawer_toggle_hover_color);
-  background-color: var(--context_drawer_toggle_hover_background);
+  color : var(--context_drawer_toggle_color_hover);
+  background: var(--context_drawer_toggle_background_hover);
 }
-.toggle_context_drawer:active,
+.toggle_context_drawer:active{
+  color : var(--context_drawer_toggle_color_active);
+  background: var(--context_drawer_toggle_background_active);
+}
 .toggle_context_drawer:focus{
-  color : var(--context_drawer_toggle_actfoc_color);
-  background-color: var(--context_drawer_toggle_actfoc_background);
+  color : var(--context_drawer_toggle_color_focus);
+  background: var(--context_drawer_toggle_background_focus);
 }
 .toggle_view{
   min-height:50px;
@@ -135,7 +140,6 @@ section.view_2 { overflow: auto }
   font-size: var(--toggleView_font-size);
   font-weight: bold;
   text-decoration: none;
-  cursor: pointer;
   border-radius: 15px;
   color: var(--toggleView_color);
   background: var(--toggleView_background);
@@ -150,19 +154,24 @@ section.view_2 { overflow: auto }
 }
 /* HOVER / FOCUS BUTTONS */
 .toggle_view:hover{
-  color: var(--toggleView_hover_color);
-  background-color : var(--toggleView_hover_background-color);
-  box-shadow: var(--toggleView_hover_focus_box-shadow);
+  color: var(--toggleView_color_hover);
+  background : var(--toggleView_background_hover);
+  box-shadow: var(--toggleView_box-shadow_hover);
 }
 
 /* ACTIVE BUTTONS */
-.toggle_view:active, .toggle_view:focus {
-  color: var(--toggleView_actfoc_color);
-  background-color: var(--toggleView_actfoc_background-color);
-  border :  var(--toggleView_actfoc_border);
-  box-shadow: var(--toggleView_actfoc_box-shadow);
+.toggle_view:active {
+  color: var(--toggleView_color_active);
+  background: var(--toggleView_background_active);
+  border :  var(--toggleView_border_active);
+  box-shadow: var(--toggleView_box-shadow_active);
 }
-
+.toggle_view:focus {
+  color: var(--toggleView_color_focus);
+  background: var(--toggleView_background_focus);
+  border :  var(--toggleView_border_focus);
+  box-shadow: var(--toggleView_box-shadow_focus);
+}
 /*Misc*/
 .downloadall{
   background : none;
@@ -179,15 +188,13 @@ section.view_2 { overflow: auto }
  |_____/ \__,_|_| |_| |_|_| |_| |_|\__,_|_|   \__, |
                                                __/ |
                                               |___/ 
-// Defines Look of Summary Dropdowns
-  line-height:1.5rem;
-*/
-
 /* GENERIC DETAILS THINGS */
 summary{
-  font-weight: 400;
+  font-family:var(--font-family-headline);
+  font-weight: 500;
   text-align: left;
   font-size: var(--summary-font_size);
+  text-transform: capitalize;
   padding-left: 10px;
   padding-right: 10px;
   cursor: pointer;
@@ -196,9 +203,12 @@ summary:hover{
   font-weight: 500; 
 }
 details{
-  background-color: var(--details_background-color);
+  font-family:var(--font-family-content);
+  color: var(--details_color);
+  background: var(--details_background);
   font-size: var(--details-font_size);
   padding: 0px;
+  cursor: default;
 }
 .detailInnerContent > label {
   text-align: left;
@@ -218,15 +228,11 @@ details[open] > .detailInnerContent {
   margin-left: 15px;
   display: inline-block;
 }
-.formField > input {
+.formField > input, 
+.formField > select{
   float: right;
   margin-right:15px;
-  background-color : white;
-}
-.formField > select {
-  float: right;
-  margin-right:15px;
-  background-color : white;
+  background : white;
 }
 form.detailInnerContent {
   padding-top: 5px;
@@ -245,14 +251,20 @@ form.detailInnerContent {
 section > details > details > details > summary::-webkit-details-marker { display: none; }
 section > details > details > details > summary:hover {  /* hover */
   color: var(--details_details_summary_color_hover);
-  background-color: var(--details_details_summary_background_hover_color);
+  background: var(--details_details_details_summary_background_hover);
 }
-section > details > details > details > summary:focus{  /* actfoc */
-  color: var(--details_details_summary_color_actfoc);
-  background-color: var(--details_details_summary_background_actfoc_color);
+section > details > details > details > summary:active{  /* active */
+  color: var(--details_details_summary_color_active);
+  background: var(--details_details_details_summary_background_active);
+}
+section > details > details > details > summary:focus{  /* focus */
+  color: var(--details_details_summary_color_focus);
+  background: var(--details_details_details_summary_background_focus);
 }
 section > details > details > details > summary{
-  background-color: var(--details_details_details_summary_background-color);
+  color: var(--details_details_details_summary_color);
+  background: var(--details_details_details_summary_background);
+  font-size: var(--details_details_details_summary-font_size);
   position: sticky;
   top: 72px;
   z-index:1;
@@ -260,7 +272,7 @@ section > details > details > details > summary{
   padding-bottom:.5em;
   border-left-style: solid;
   border-left-width: .5em;
-  border-left-color: var(--details_details_summary_background-color); /* LEFT BORDER IS COLOR OF PARENT SUMMARY*/
+  border-left-color: var(--details_details_summary_background); /* LEFT BORDER IS COLOR OF PARENT SUMMARY*/
   transition: background 200ms, color 200ms;
 }
 section > details > details > details{
@@ -276,16 +288,22 @@ section > details > details > details{
 /* Details Layer 2 */
 section > details > details > summary::-webkit-details-marker { display: none; }
 section > details > details > summary:hover {  /* hover */
+  font-size: var(--details_details_summary-font_size);
   color: var(--details_details_summary_color_hover);
-  background-color: var(--details_details_summary_background_hover_color);
+  background: var(--details_details_summary_background_hover);
 }
-section > details > details > summary:focus{  /* actfoc */
-  color: var(--details_details_summary_color_actfoc);
-  background-color: var(--details_details_summary_background_actfoc_color);
+section > details > details > summary:focus{  /* active */
+  color: var(--details_details_summary_color_active);
+  background: var(--details_details_summary_background_active);
+}
+section > details > details > summary:focus{  /* focus */
+  color: var(--details_details_summary_color_focus);
+  background: var(--details_details_summary_background_focus);
 }
 section > details > details > summary{
+  font-size: var(--details_details_summary-font_size);
   color: var(--details_details_summary_color);
-  background-color: var(--details_details_summary_background-color);
+  background: var(--details_details_summary_background);
   position: sticky;
   top: 30px;
   z-index:2;
@@ -293,9 +311,9 @@ section > details > details > summary{
   transition: background 200ms, color 200ms;
 }
 section > details > details{
+  border-left: var(--details_summary_background); /* LEFT BORDER IS COLOR OF PARENT SUMMARY*/
   border-left-style: solid;
   border-left-width: .5em;
-  border-left-color: var(--details_summary_background-color); /* LEFT BORDER IS COLOR OF PARENT SUMMARY*/
 }
 
 
@@ -308,20 +326,27 @@ section > details > details{
 section > details > summary::-webkit-details-marker { display: none; }
 section > details > summary:hover {  /* hover */
   color: var(--details_summary_color_hover);
-  background-color: var(--details_summary_background_hover_color);
+  background: var(--details_summary_background_hover);
 }
-section > details > summary:focus{  /* actfoc */
-  color: var(--details_summary_color_actfoc);
-  background-color: var(--details_summary_background_actfoc_color);
+section > details > summary:focus{  /* active */
+  color: var(--details_summary_color_active);
+  background: var(--details_summary_background_active);
+}
+section > details > summary:focus{  /* focus */
+  color: var(--details_summary_color_focus);
+  background: var(--details_summary_background_focus);
 }
 section > details > summary{ /* summary default  */
   color: var(--details_summary_color);
-  background-color: var(--details_summary_background-color);
+  background: var(--details_summary_background);
   position: sticky;
   top: 0px;
   z-index:3;
   padding:.5em;
   transition: background 200ms, color 200ms;
+}
+section > details{
+  border-bottom : var(--section-details_border_bottom)
 }
 
 section > details[open]> summary:active,  /* open summary lvl 1 */

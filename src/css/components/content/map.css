@@ -1,29 +1,52 @@
 /* Map */
 
+
+
+#mapid:focus{border: none;}
+.leaflet-bar a.leaflet-disabled{ color: black;}
+#mapid{
+  cursor: grab;
+  z-index: 0; height: 100% !important; }
 .legendContainer{
-  background-color: white;
+  padding:10px;
+}
+#mapid:active{
+  cursor: grabbing;
+  z-index: 0; height: 100% !important; }
+.legendContainer{
+  padding:10px;
 }
 
-.leaflet-tooltip {
-  min-width: 200px;
-  max-width: 300px;
-  overflow : hidden;
-  text-overflow: ellipsis;
 
-  background: var(--bg-color-2);
-  color:#eee;
+.legendContainer{
+  background: white;
+}
+
+.leaflet-container a.leaflet-popup-close-button{
+  font: 36px/24px Tahoma, Verdana, sans-serif !important;
+  color: #fff !important;
+}
+.leaflet-container a.leaflet-popup-close-button:hover{
+  font: 36px/24px Tahoma, Verdana, sans-serif !important;
+  color: #eee !important;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-tooltip {
+  width: 310px;
+  background: var(--bg-color-2) !important;
+  color: white !important;
   font-size:16px;
   line-height:24px;
+  text-align: left;
+  border-radius: 0px !important;
+  border: 1px solid #fff !important;
 
-
-  border-left:15px solid transparent;
-  border-right:15px solid transparent;
-  border-top:9px solid var(--bg-color-1);
+  white-space: pre-wrap !important;
 }
-
-
-
-
+.leaflet-popup-content{
+  max-width: 40vw;
+  margin: 8px !important;
+}
 
 
 
@@ -31,21 +54,21 @@
 div.geocoder-control-suggestions.leaflet-bar{ display : none; }
 input.geocoder-control-input.leaflet-bar{ width : 30px; height: 30px; margin: 0px !important; }
 input.geocoder-control-input.leaflet-bar:focus{  width : 100%; padding-left: 30px; }
-input.geocoder-control-input.leaflet-bar:hover{ background-color: #f4f4f4; }
+input.geocoder-control-input.leaflet-bar:hover{ background: #f4f4f4; }
 
 /* Geocoder Container / Font Awesome Icon */
 div.geocoder-control.leaflet-control {
-  background-color: white; 
+  background: white; 
 }
 div.geocoder-control.leaflet-control:hover > input.geocoder-control-input.leaflet-bar,
 div.geocoder-control.leaflet-control:hover {
-  background-color: #f4f4f4; 
+  background: #f4f4f4; 
 }
 
 div.geocoder-control.leaflet-control:before {
   content: "\f002";
   color:black;
-  background-color : rgba( 255,255,255,0);
+  background : rgba( 255,255,255,0);
   font-family: FontAwesome;
   position: absolute;
   font-size: 16px;
@@ -53,7 +76,10 @@ div.geocoder-control.leaflet-control:before {
   top : 5px;
 }
 
-
+.legend-row > .symbol {
+  width: 15px !important;
+  height: 15px !important;
+}
 
 
 /*
@@ -93,7 +119,7 @@ LEGEND
     position: relative;
     width: 13px;
     height: 7.51px;
-    background-color: #64C7CC;
+    background: #64C7CC;
     margin: 3.75px 0;
 }
 

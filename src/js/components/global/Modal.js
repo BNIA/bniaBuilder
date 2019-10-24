@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 const e = React.createElement;
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 
 export default class Modal extends Component {
   displayName: 'Modal';
@@ -43,12 +44,17 @@ class ModalContent extends Component {
 	  let href = (contentItem.properties && contentItem.properties.href) ? contentItem.properties.href : {};
 	  return ( e(contentItem.component, { key: i, style: style, href: href }, contentItem.children) )
 	})
+    
+    // PARSE HTML
+    let reactHtmlParser = <div>{ ReactHtmlParser( "<div> </div>" ) }</div>;
+
 	// Create the Modal & Insert the Content
     return ( 
     < section className = 'modal_content' id = { 'modal_' + SubTitle } style = { properties.style } >
       < h2 > { Title } < /h2>
       < h3 style = { SubtitleStyle } > { SubTitle.replace(/_/g, ' ') } < /h3>  
       { innerContents} 
+      {reactHtmlParser}
       <br/>
       < button className = "toggle_view close_modal" tabIndex = "0" > OK < /button> 
     < / section >

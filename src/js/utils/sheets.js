@@ -1,8 +1,13 @@
-import {fetchData} from 'js/utils/utils';
+import {fetchData, splitObjectArrayByKey} from 'js/utils/utils';
 
 /*
 Inputs : SheetID, 
 Outputs : take a Google Sheet ID and return a configuration doc
+Description : 
+  -- Calls google Spreadsheets given a key
+  -- Grabs a field called 'layers' and 'fields'
+  -- group fields by a 'key'
+  -- Stuff a grouping into layers that have the same 'key'
 */
 export async function getSheets(sheetsUrlKey){
   let sheetsUrl = 'https://spreadsheets.google.com/feeds/list/'+sheetsUrlKey+'/';
@@ -20,28 +25,36 @@ export async function getSheets(sheetsUrlKey){
     sheetData = await readSpreadsheet(sheetUrl);
     layersIndex = sheetData.title == 'layers' ? sheetNumber-1 : layersIndex;
     fieldsIndex = sheetData.title == 'fields' ? sheetNumber-1 : fieldsIndex;
-    //console.log(sheetUrl); //console.log(sheetData.title); //console.log(sheetData); //console.log('sheetsData ^ ');
     (sheetData != 'error') ? (sheetNumber++, sheetsData.push(sheetData) ) : sheetNumber = 'NaN'
   } while( typeof(sheetNumber) == 'number' &&  sheetNumber < 7 )
 
-  // Insert Fields into Layers.
-  let layers = sheetsData[layersIndex];
-  let fields = Object.keys(sheetsData[fieldsIndex]['entry']).map(function (key) { return sheetsData[fieldsIndex]['entry'][key]; });
+  // Read the Fields and Layers Sheet
+  let layers = sheetsData[layersIndex]['entry'];
+  let fields = Object.keys(sheetsData[fieldsIndex]['entry']).map(key=>{ return sheetsData[fieldsIndex]['entry'][key] });
 
-  // Group the Fields
-  let groupedFields = groupBy(fields, function(item) { return [item.key]; });
+  // Group the Fields by key
+  // (creates an array of array of objects for array of objects)
+  let groupedFields = splitObjectArrayByKey(fields, function(item) { return [item.key] });
   
-  Object.keys(layers['entry']).map(function(layer) {
-    let fields = groupedFields.filter(function(group) { return group[0]['key'] == layers['entry'][layer]['key'] ? group : null });
-    layers['entry'][layer]['fields'] = fields[0];
+  // Insert Into Layers a Group if it matches Key
+  Object.keys(layers).map( i  => {
+    let fields = groupedFields.filter( group =>{ 
+      return group[0]['key'] == layers[i]['key'] ? group : [ ] 
+    } );
+    layers[i]['fields'] = fields[0];
   } )
+
   sheetsData = sheetsData.filter( x => x.title != 'fields' )
   return sheetsData;
 }
 
-
+/*
+Inputs : 
+Outputs : 
+Description : 
+  -- Gather Sheet Information
+*/
 async function readSpreadsheet(url){
-  // Gather Sheet Information
   let returnData = [];
   let data = await fetchData(url); data = data.feed;
   returnData['entry'] = [];
@@ -117,7 +130,11 @@ async function readSpreadsheet(url){
   return returnData
 }
 
-// Parse the Modals Json Object and return a usable verision of it
+/*
+Inputs : 
+Outputs : 
+Description : Parse the Modals Json Object and return a usable verision of it
+*/
 function readModal(givenData){
   let returnObject = []; 
   Object.keys(givenData['entry']).map(function(index) {
@@ -151,16 +168,4 @@ export function isEmpty(strIn) {
   else if(strIn == null) { return true; }
   else if(strIn == "") { return true; }
   else { return false; }
-}
-
-export function groupBy( array , f ) {
-  var groups = {};
-  array.forEach( function( o )
-  {
-    var group = JSON.stringify( f(o) );
-    groups[group] = groups[group] || [];
-    groups[group].push( o );  
-  });
-  return Object.keys(groups).map( function( group )
-  { return groups[group]; })
 }

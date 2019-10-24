@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { fetchData } from 'js/utils/utils';
 import ReactDisqusComments from 'react-disqus-comments';
-import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
+import {SimpleDetails, downloadCsv} from 'js/utils/utils';
 
 import {getSheets} from 'js/utils/sheets'
-import { downloadObjectAsJson } from 'js/utils/utils.js'
 import {fillDictionaries} from 'js/utils/dictionary'
 
 export default class Context extends Component {
@@ -23,9 +22,11 @@ export default class Context extends Component {
   	  let feature = details.clickedRecord
   	  let props = feature.properties;
 	  let coords = '';
-	  if(feature.geometry.coordinates.length == 2){ coords = feature.geometry.coordinates }
-	  else{ coords = feature.geometry.coordinates[0]	}
+	  let flag = false;
+	  if(feature.geometry.coordinates.length == 2){ flag=true; coords = feature.geometry.coordinates; }
+	  else{ coords = feature.geometry.coordinates[0]; }
   	  let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
+  	  coordinates = flag ? [ coords[0] , coords[1] ] : coordinates;
       let identifier = 'Coordinates : '+coordinates[1]+'&'+coordinates[1];
       const notEmpty = (value) => { return value && value.length > 3; }
       if( notEmpty(props.BL) ){ identifier = 'BlockLot : '+ props.BL}
@@ -66,15 +67,12 @@ export default class Context extends Component {
     let download = ''; //html
 	let givenName = 'Rotate View';
 	let modalButton = '';
-    // Details
+
     if (details) {
 	  // BigModal button
 	  if(state.configuration.showAllRecordsBtn){ 
 	    modalButton = <button className='toggle_view open_big_modal' > Show All </button> 
 	  }
-
-      // Download Details
-      download = <button onClick = { () => downloadCsvs( details.clickedLayer, details.foreignLayers ) } className='downloadall'> Download All </button>;
 
       // GSV address label
 	  let clickedRecord = details.clickedRecord.properties;
@@ -84,17 +82,13 @@ export default class Context extends Component {
 	  if( clickedRecord.address && clickedRecord.address != ' ' ){ givenName = clickedRecord.address }
 	  if( clickedRecord.ADDRESS && clickedRecord.ADDRESS != ' ' ){ givenName = clickedRecord.ADDRESS }
 
-      // Construct the Clicked Detials
+      // Construct the Clicked Detials & Details Pane
       clickedDetails = ClickedDetails( details )
-      //clickedDetails = ''
-
-      // sort (group/subgroup nesting) for foreign layers.
-      let sortedForiegnLayers = sortDictionaries(details.foreignLayers)
-      controller = DetailsPane( details, sortedForiegnLayers);
+      controller = DetailsPane( state );
+      // Download Details
+      download = <button onClick = { () => downloadCsvs( state ) } className='downloadall'> Download All </button>;
 
     }
-    let underline = {width:'100%', height:'2px', background:'black'}; 
-    underline = <div style={underline}> </div>;
     return (
       < aside id = 'context_drawer' > 
         < section id = 'right-drawer' > 
@@ -111,15 +105,14 @@ export default class Context extends Component {
               < button style = { styleBtn } onClick = { () => this.rotateView(45) } > Right < /button> 
             < / div > 
           < /details>
-          {underline}
           < details open key = { 'contexDetail12' } > 
             < summary > Details < /summary > 
             <p> First Record will be shown </p>
             { clickedDetails}
             { controller } 
             { modalButton }{ download }
-          < /details> 
-          {underline}
+            <div id="downloadCsv" ></div>
+          < /details>
           < details open key = { 'contexDetail13' } > 
             < summary > Discussion  < /summary > 
             <ReactDisqusComments
@@ -128,8 +121,7 @@ export default class Context extends Component {
               title= {this.state.identifier}
               url= {disqusUrl}
               onNewComment={this.handleNewComment}/>
-          < /details> 
-          {underline}
+          < /details>
         < / section > 
       < /aside>
     )
@@ -157,54 +149,59 @@ const ClickedDetails = (details) => {
 		< /div>
 	  )
   } )
-  details.unshift(<h2 key={'detailsHeader'}>{alias}</h2>)
+  dictionary.showrecordtitleinpopup ? details.unshift(<h3 key={'detailsHeader'}>{alias}</h3>) : null;
   return details
+}
+
+const e = React.createElement;
+function Compare(strA, strB) {
+  strA = strA.toLowerCase().trim();
+  strB = strB.toLowerCase().trim();
+  for (var result = 0, i = strA.length; i--;) {
+    if (typeof strB[i] == 'undefined' || strA[i] == strB[i]) { false }
+    else if (strA[i].toLowerCase() == strB[i].toLowerCase()) { result++; } 
+    else { result += 4; }
+  }
+  return 1 - (result + 4 * Math.abs(strA.length - strB.length)) / (2 * (strA.length + strB.length));
 }
 
 
 
 
 // COMPONENT -> ConnectDetails & SimpleDetails
-const DetailsPane = ( details, sortedForiegnLayers) => {
-
+const DetailsPane = ( state ) => {
+  
   // Map through the all the groups
-  let returnThis = sortedForiegnLayers.map( (group, i) => {
-  	// If the group length is 1, display the single layered group
-	if (group.length == 1 && group[0].length == 1) {
-	  return ConnectDetails(details, group[0][0]); 
-	}
-	// otherwise map through the entries in the group
-	let detailContent = group.map( (subgroup, i) => {
-      // Entries are typically layers but may contain subgroups
-	  if (subgroup[0]['subgroup'] == false) {
-	  	//console.log('subgroup', subgroup);
-		let subgroupContent = subgroup.map( (dict, i) => { return ConnectDetails(details, dict); } )
-		return subgroupContent
-	  }
-	  else{
-	    let subgroupContent = subgroup.map( (dict, i) => { return ConnectDetails(details, dict ); } )
-	    return subgroupContent;
-	  }
-	} )
-	return detailContent;
-  } );
+  let details = state.details
+  let groups = details.foreignLayers
+  let returnThis = groups.map( group => {
 
+  	// Display alone if foreignLayer & subgroup length = 1
+	// if (group.length == 1 && group[0].length == 1){ return ConnectDetails(details, group[0][0]) }
+
+	// otherwise map through the entries in the group, typically layers but may contain subgroups
+	return group.map( subgroup => { 
+	  return subgroup.map( layerDetials => { 
+	    let dictionary = state.dictionaries.filter( k => { return k.service+k.layer+'' === Object.keys(layerDetials)[0]  })[0];
+	    return ConnectDetails(layerDetials, dictionary);
+	  } ) 
+	} )
+  } );
   return returnThis
 }
 
 // Display all the connected details from a connected dictionary
 const ConnectDetails = (details, dict) => {
-  // dict refers to the specific connected layer we want to display. 
-  // connected records are stored in the layer object as 'connectedRecords'
+  // dict = the connected layer to display 
+  // pData = connecrd records 
   let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
   let alias = dict.alias;
   let detail = false;
   let pData = dict.connectedRecords;
-
   // If the connecteddictionary has parcel data.
   if(pData && pData.length){
   	// Sort Descending by 'YEAR' 
-  	if(pData.length > 1){ pData.sort(function(a, b) { return b.Year - a.Year; }); }
+  	if(pData.length > 1){ pData.sort( (a, b) => { return b.Year - a.Year; }); }
   	pData = pData[0];
     detail = Object.keys(pData).map( (key, index) => {
 	  // Find the Field Alias from our dictionary matching the Key of our new inbound data.
@@ -219,63 +216,29 @@ const ConnectDetails = (details, dict) => {
 		< /div>
 	  )
     } )
-    // Download Details
-    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download all {alias}</button>;
     return (
       <details key={alias}> 
         <summary> {alias} </summary>
        {detail}
-       {download}
      </details>
    )
   }
   return false
 };
 
+// DOWNLOAD CSVs - calls downloadCsv
+function downloadCsvs( state ){
+  let details = state.details;
+  downloadCsv( details.clickedLayer )
 
-
-
-// JSON -> CSV CONVERTER
-function convertObject( dictionary ){
-  const items = dictionary.connectedRecords;
-  if(!items || !items.length){return false}
-  const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
-  const header = Object.keys(items[0])
-  let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
-  let headerLabels = dictionary.fields.filter(field=>header.includes(field.name)).map(field=>field.alias)
-  csv.unshift(headerLabels.join(','))
-  csv = csv.join('\r\n')
-  return csv
-}
-
-// CSV DOWNLOAD
-function downloadCsvs( dictionary, connectedDictionaries ){
-  let clickedLayer = downloadCsv( dictionary );
-  if ( connectedDictionaries != undefined ){
-	let connectedLayers = connectedDictionaries.map( 
-      dictionary => { downloadCsv( dictionary ) 
-	})
-  }
-}
-function downloadCsv( dictionary ){
-  let clickedLayer = convertObject( dictionary );
-  if(!clickedLayer){return null}
-  var pom = document.createElement('a');
-  var csvContent=clickedLayer; //here we load our csv data 
-  var blob = new Blob([csvContent],{type: 'text/csv;charset=utf-8;'});
-  var url = URL.createObjectURL(blob);
-  pom.href = url; pom.setAttribute('download', dictionary.alias.replace(/ /g,'')+'.csv'); pom.click();
-}
-
-const e = React.createElement;
-function Compare(strA, strB) {
-  strA = strA.toLowerCase().trim();
-  strB = strB.toLowerCase().trim();
-  for (var result = 0, i = strA.length; i--;) {
-    if (typeof strB[i] == 'undefined' || strA[i] == strB[i]) { false }
-    else if (strA[i].toLowerCase() == strB[i].toLowerCase()) { result++; } 
-    else { result += 4; }
-  }
-  let value = 1 - (result + 4 * Math.abs(strA.length - strB.length)) / (2 * (strA.length + strB.length));
-  return value
+  let groups = details.foreignLayers;
+  let returnThis = groups.map( group => {
+	return group.map( subgroup => { 
+	  return subgroup.map( layerDetials => { 
+	    let layer = state.dictionaries.filter( k => { return k.service+k.layer+'' === Object.keys(layerDetials)[0]  })[0];
+	    console.log(layer);
+	    downloadCsv( layer) 
+	  } ) 
+	} )
+  } )
 }

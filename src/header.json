@@ -1,0 +1,20 @@
+{
+    "title":"Development Website",
+    "author":"Development Website",
+    "ownername":"Development Website",
+    "owneremail":"mailto:name@example.com",
+    "ownerphone":"sms:+11234567890",
+    "description":"Development Website",
+    "applicationname":"Development Website",
+    "canonical":"./",
+    "geoposition":"39.290385; -76.612189",
+    "themecolor":"#0080f0",
+    "ico64x64":"./images/favicon64.ico",
+    "ico32x32":"./images/favicon32.ico",
+    "ico24x24":"./images/favicon24.ico",
+    "ico16x16":"./images/favicon16.ico",
+    "image":"https://bniajfi.org/wp-content/uploads/2014/04/bnia_logo_new.png",
+    "type":"city",
+    "twittersite":"@site_account",
+    "twitterauthor":"@individual_account"
+}

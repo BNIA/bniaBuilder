@@ -1,63 +1,56 @@
 import React, {Component} from 'react';
-
 import {fetchData} from 'js/utils/utils';
-
 import Body from 'js/components/global/Body';
 import Header from 'js/components/global/Header';
-import Login from 'js/components/global/Login';
-
-import { getSheets } from 'js/utils/sheets'
-import { downloadObjectAsJson } from 'js/utils/utils.js'
-import { fillDictionaries } from 'js/utils/dictionary'
-
 import {getFieldSuggestion, handleSubmit, getDetails, handleReset} from 'js/utils/search'
 import * as myConfig from '../../json_config.json';
+import * as authRules from '../../auth_rules.json';
+let style = { ...myConfig.style, ...myConfig.theme };
+let config = Object.assign(myConfig, authRules);
+
+/*
+#File: App.js
+#Author: Charles Karpati
+#Date: Feb 2019
+#Section: Bnia
+#Email: karpati1@umbc.edu
+#Description: The root component. Called from Main.js 
+#Purpose: Loads needed components, passes down needed functions to components, handles state 
+#input: Fetch utility, [Body, Header, BigModal, Account] components, configuration/authRules 
+#output: The Website
+*/
+
+import {account_login, account_logout, account_update, account_recovery, account_create, handleRemove, showDetails} from 'js/utils/stateFunctions'
 
 export default class App extends Component {
   displayName: 'App';
+
+  //
+  // The state is passed from the config doc
+  // All major application functionalities are listed here
+  // we stuff all state-altering functions into the 'stateFunctions' object 
+  // so that they may be passed down components for calling
+  //
   constructor(props) {
     super(props);
-    this.handleRemove = this.handleRemove.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleReset = this.handleReset.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.showDetails = this.showDetails.bind(this);
-    this.getSheets = this.getSheets.bind(this);
-    this.state = myConfig
+    this.stateFunctions = {
+      account_login : account_login.bind(this),
+      account_logout : account_logout.bind(this),
+      account_update : account_update.bind(this),
+      account_recovery : account_recovery.bind(this),
+      account_create : account_create.bind(this),
+      inputChange : this.handleChange.bind(this),
+      handleReset : this.handleReset.bind(this),
+      handleSubmit : handleSubmit.bind(this),
+      handleRemove : handleRemove.bind(this),
+      showDetails : showDetails.bind(this)
+    };
+    this.state = config
   }
 
-  // The currentFormsData is retrieved on input keypres using getFieldSuggestion()
-  async handleChange(event){
-    let update = await (getFieldSuggestion(event, this.state.dictionaries) );
-    this.setState({ 
-      dictionaries: update, 
-      'event': 'handleChange',
-    });
-  }
-  
-  // When a user clicks 'Search' our 'STATE.RECORDS' += layer['currentFormsData'] 
-  async handleSubmit(event){
-    let updates = await handleSubmit(event, this.state.records, this.state.dictionaries);
-    this.setState({
-      dictionaries: updates,
-      'userHasSearched' : true,
-      'event': 'handleSubmit',
-    });
-  }
 
-  // Query all Connected Records at Block_lot. get Parcel?
-  async showDetails(event){
-    console.log('showDetails')
-    let update = await ( getDetails(event, this.state ) );
-    let details = update;
-    this.setState( {
-      'details' : details,
-      'event': 'showDetails',
-    } );
-  }
-
-  // Reset Suggestions & Form Field Curvals
-  async handleReset(event){
+// Reset Suggestions & Form Field Curvals
+async handleReset(event){
     let form = event.target.form;
     let key = form.dataset.key;
     let newDictionary = this.state.dictionaries;
@@ -69,81 +62,45 @@ export default class App extends Component {
       }
     } )
     if(layer.currentFormsData) delete layer.currentFormsData;
-    this.setState({ 
-      dictionaries : newDictionary, 
-      'event': 'handleReset'
-    });
+    this.setState({ dictionaries : newDictionary });
+  }
+// Get Search Suggestions
+async handleChange(event){
+    // The currentFormsData is retrieved on input keypres using getFieldSuggestion()
+    // onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';"
+    let update = await (getFieldSuggestion(event, this.state.dictionaries) );
+    this.setState({ dictionaries: update } );
   }
 
-  // Remove a Clicked Layer.
-  async handleRemove(event){
-    let key = event.target.dataset.key;
-    let dictionaries = this.state.dictionaries;
-    let layer = dictionaries.filter(layer => { return layer.key == key  })[0];
-    delete layer['dataWithCoords'];
-    this.setState( {
-      dictionaries,
-      'event': 'handleRemove'
-    } );
-  }
 
-  // Download the google spreadsheet
-  async getSheets(event){
-  	event.preventDefault();
-  	console.log('Get Sheets');
-    let target = event.target;
-    let dropdowns = target.getElementsByTagName('select')
-    let resp = await getSheets( dropdowns[0].value );
-    if( resp == null){return null}
-    else{
-      let newState = {}
-      resp.map( sheet => { newState[sheet.title] = sheet.entry } )
-      let filledDictionaries = await fillDictionaries(newState.layers);
-      console.log(filledDictionaries);
-      newState.dictionaries = filledDictionaries;
-      delete newState.layers;
-      downloadObjectAsJson( newState, 'json_config' );
-    }
-  }
-
-  // Toggles Text to Speach
+  //
+  // Load the Login / BigModal components if config doc says so.
+  //
   async componentDidMount(){ 
-    let userLogin = this.state.configuration.userLogin;
+    let sessionId = await fetchData('./api?purpose=visiting');
     let loginRequired = this.state.configuration.loginRequired;
-    if(userLogin && loginRequired){
-      console.log('LOGIN REQUIRED');
-    }
-    console.log(loginRequired);
-
-    this.state.configuration.speech ? await import('js/utils/annyang.min.js') : ''; 
-    const BigModal = !this.state.configuration.showAllRecordsBtn ? false : await import('js/components/global/BigModal');
-    this.setState( { BigModal : BigModal.default } )
+    // this.state.configuration.speech ? await import('js/utils/annyang.min.js') : ''; 
+    /* Code Splitting works but now only request the resources on button click */
+    const Account = this.state.auth.loginEnabled == 'false' ? false : await import (/* webpackChunkName: "account" */ 'js/components/global/Account');
+    const BigModal = this.state.configuration.showAllRecordsBtn == 'false' ? false : await import(/* webpackChunkName: "bigmodal" */ 'js/components/global/BigModal');
+    this.setState( { Account : Account.default , BigModal : BigModal.default } )
   }
-  render () {
-    if (navigator.appName == 'Microsoft Internet Explorer' || !!(navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/))){ alert("Please dont use IE."); }
-    
-    // These functions are crucial for the app to work.
-    let stateFunctions = {
-      inputChange : this.handleChange,
-      submitted : this.handleSubmit,
-      removed : this.handleRemove,
-      reset : this.handleReset,
-      showDetails : this.showDetails,
-      getSheets : this.getSheets
-    };
-
-    // CSS Variables allow for dynamic Style and Theming.
-    let merge = {...this.state.style, ...this.state.theme}
-    let bigModal = ''; 
+  //
+  // Load the Header and Body. As well Account/ Bigmodal conditionally
+  //
+  render () { 
+    let returnThis = [
+      <Header key='header' state={this.state}  modal={this.state.modals} appName={this.state.configuration.longName} />,
+      <Body key='body' stateFunctions={this.stateFunctions} state={this.state} />
+    ]
+    if(this.state.auth.loginRequired && this.state.auth.loginEnabled && this.state.Account){
+      returnThis.push( <this.state.Account key='account' stateFunctions={this.stateFunctions} state={this.state}/> 
+      ) 
+    }
     if(this.state.details && this.state.configuration.showAllRecordsBtn && this.state.BigModal){ 
-	  bigModal = <this.state.BigModal state={this.state}/> 
-	}
-    return (
-    <div style={merge}>
-      {bigModal}
-      <Header state={this.state}  modal={this.state.modals} appName={this.state.configuration.longName} />
-      <Body stateFunctions={stateFunctions} state={this.state}/>
-    </div>
-    );
+      returnThis.push(<this.state.BigModal key='bigModal' state={this.state}/> 
+      ) 
+    }
+    return <div style={style}> { returnThis } </div>
   }
 }

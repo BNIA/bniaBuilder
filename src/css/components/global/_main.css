@@ -21,7 +21,8 @@ aside {
   display:flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: var(--aside_background-color); 
+  background: var(--aside_background); 
+  color: var(--aside_color); 
 }
 
 #navigation_drawer section{
@@ -37,4 +38,54 @@ aside article {
   text-align: left;
   width: 100%;
   margin:auto;
+}
+
+
+.graybox {
+  min-width:150px;
+  min-height:150px;
+  max-height: 500px;
+  border-radius: 10px;
+  border: aliceblue solid 1px;
+  background: lightslategray;
+  text-align: center;
+  padding: 10px;
+}
+#controller {
+  display: inline-flex;
+  flex-wrap: wrap;
+  overflow:auto;
+}
+#dashboardid {
+  position:relative;
+  height: 100%;
+  width: 100%;
+  overflow : auto;
+}
+
+/* the controller and canvas have to both be absolutely positioned. */
+#controller-container {
+  width:100%;
+  min-height:100%;
+  height:auto;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 0;
+  background: rgba(255, 255, 255, 0.45);
+}
+#canvas{
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+#canvas:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+#milkdrop{
+  position : inline;
 }

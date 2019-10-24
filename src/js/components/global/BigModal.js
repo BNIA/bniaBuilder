@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 const e = React.createElement;
-import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
+import { SimpleDetails, downloadCsv } from 'js/utils/utils';
 import ReactTable from "react-table";
 
 export default class BigModal extends Component {
@@ -23,10 +23,12 @@ export default class BigModal extends Component {
     let details = state.details;
     let feature = details.clickedRecord;
     let props = feature.properties;
-    let coords = '';
-    if(feature.geometry.coordinates.length == 2){ coords = feature.geometry.coordinates }
-    else{ coords = feature.geometry.coordinates[0]	}
-    let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
+	let coords = '';
+	let flag = false;
+	if(feature.geometry.coordinates.length == 2){ flag=true; coords = feature.geometry.coordinates; }
+	else{ coords = feature.geometry.coordinates[0]; }
+	let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
+	coordinates = flag ? [ coords[0] , coords[1] ] : coordinates;
     let [lng, lat] = coordinates;
     // Street View
     let styleContainer = { width: '50%', margin: 'auto', align : 'center' }
@@ -51,9 +53,7 @@ export default class BigModal extends Component {
       // Construct the Clicked Detials
       clickedDetails = ClickedDetails( details )
 
-      // sort (group/subgroup nesting) for foreign layers.
-      let sortedForiegnLayers = sortDictionaries(details.foreignLayers)
-      controller = DetailsPane( details, sortedForiegnLayers );
+      controller = DetailsPane( state );
     }
     
     let style = {display:'none'}
@@ -81,7 +81,7 @@ export default class BigModal extends Component {
 		  < button className = "toggle_view close_big_modal" tabIndex = "0" > OK < /button> 
 		< / section >
       < /div >
-    );
+    ) 
   }
 }
 
@@ -104,7 +104,7 @@ function addModalListeners(){
     if (event.target.classList.contains('open_big_modal')) { 
       document.getElementsByClassName('modal_big_wrapper')[0].style.display = "block"
     }
-  });
+  }, {passive: true});
 }
 
 
@@ -154,30 +154,25 @@ const ClickedDetails = (details) => {
 };
 
 
-
-
-
-
-
-
-
-
-//
 // COMPONENT -> ConnectDetails & SimpleDetails
-const DetailsPane = ( details, sortedForiegnLayers ) => {
-  return sortedForiegnLayers.map(function(group, i) {
-	if (group.length == 1 && group[0].length == 1) { return ConnectDetails(details, group[0][0]); }
-	let detailContent = group.map(function(subgroup, i) {
-	  if (subgroup[0]['subgroup'] == false) {
-		let subGroupItems = subgroup.map(function(dict, i) { return ConnectDetails(details, dict); } )
-		return subGroupItems
-	  }
-	  let subgroupContent = subgroup.map(function(dict, i) { return ConnectDetails(details, dict); } )
-	  return subgroupContent;
-	} );
-	return detailContent;
-  } );
+const DetailsPane = ( state ) => {
+  
+  // Map through the all the groups
+  let details = state.details
+  let groups = details.foreignLayers
+  let returnThis = groups.map( group => {
+
+	// otherwise map through the entries in the group, typically layers but may contain subgroups
+	return group.map( subgroup => { 
+	  return subgroup.map( layerDetials => { 
+	    let layer = state.dictionaries.filter( k => { return k.service+k.layer+'' === Object.keys(layerDetials)[0]  })[0];
+	    return ConnectDetails(layerDetials, layer) 
+	  } ) 
+	} )
+  } )
+  return returnThis
 }
+
 
 //
 //
@@ -204,9 +199,10 @@ const ConnectDetails = (details, dict) => {
 	    < /div>
 	  )
     } );
+    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download all {alias}</button>;
     return (
      <details key={'bigmodal'+alias} open> 
-       <summary> {alias} </summary>
+       <summary> {alias} </summary> {download}
        <article style={styleConnectedArticle} > { detail } </article>
      </details>
     )
@@ -217,9 +213,10 @@ const ConnectDetails = (details, dict) => {
   	if(pData.length > 1){ pData.sort(function(a, b) { return b.Year - a.Year; }); }
     // if field.righthand assign property attributes into a new object.
     let revealthese = dict.fields.filter(field => field.righthand == true).map(field => ({ Header: field.alias, accessor: field.name }))
+    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download all {alias}</button>;
     return (
       <details key={'bigmodal'+alias} open> 
-        <summary> {alias} </summary>
+        <summary> {alias} </summary> {download}
 	    <ReactTable 
 	      data={ pData }
 	      columns={ revealthese }
@@ -231,4 +228,4 @@ const ConnectDetails = (details, dict) => {
     )
   }
   return false
-};
+}

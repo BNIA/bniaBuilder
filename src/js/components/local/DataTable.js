@@ -17,11 +17,9 @@ export default class DataTable extends Component {
 
 		  // this needs to be resolved in the search
 		  let transposedObjectArray = dc;
-		  if(layer.host != 'socrata'){
-		    transposedObjectArray = !dc ? '' : dc.map(obj => obj.properties ? obj.properties : obj.attributes)
-		  }
-		  // if field.search assign property attributes into a new object.
-		  let revealthese = layer.fields.filter(field => field.search == true).map(field => ({ Header: field.alias, accessor: field.name }))
+		  transposedObjectArray = !dc ? '' : dc.map(obj => obj.properties ? obj.properties : obj.attributes)
+		  // dataTable
+		  let revealthese = layer.fields.filter(field => field.dataTable == true).map(field => ({ Header: field.alias, accessor: field.name }))
 		  !Object.values(layer.fields[0]).includes('block_lot') ? null:revealthese.unshift({Header:'Block Lot', accessor:'block_lot'});
 		  (!dc[0] || !dc[0].properties) ? null : !Object.keys(dc[0].properties).includes('BL') ? null:revealthese.unshift({Header:'Block Lot', accessor:'BL'});
 
@@ -29,8 +27,7 @@ export default class DataTable extends Component {
 		  	data : transposedObjectArray,
 		  	columns : revealthese
 		  }
-		  console.log(whatgoesin);
-
+		  
 		  return ( [
 		    <br key={index+'b'} />,
 		    <h2 key={index+'j'} >{layer.alias}</h2>,

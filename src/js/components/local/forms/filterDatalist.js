@@ -6,12 +6,10 @@ import {clean} from 'js/utils/utils';
 // Input : field.preloadfilter, layer, suggestions
 // Output : Event : inputChange, Display : 'textboxdropdown'
 
-export class Datalist extends Component {
-  displayName: 'Datalist';
+export class FilterDatalist extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      fieldName : '',
       suggestions : []
     }
   }
@@ -22,7 +20,7 @@ export class Datalist extends Component {
 
   // Prepare the data
   updateField( props ){
-    let { layer, field, fieldName, suggestions } = props;
+    let { suggestions } = props;
     if(typeof(suggestions)=='undefined'){ suggestions=[] }
     suggestions = suggestions.map( (suggestion, i) => { return <option key={i} value={suggestion}> {suggestion} </option> 
     } )
@@ -40,3 +38,4 @@ export class Datalist extends Component {
     ]
   }
 }
+//type name placeholder 

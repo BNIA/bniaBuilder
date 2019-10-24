@@ -6,10 +6,10 @@ var geocoding = require('esri-leaflet-geocoder');
 //require ('js/utils/leafletConditionalRender');
 require ('leaflet-html-legend');
 
-import { displayPoint, mapOptions, cityBoundaryStyle, 
+import { displayPoint, cityBoundaryStyle, 
   onBoundryHover, onBoundryMouseOut, onBoundryMouseOver,  
   resetHighlight, highlightFeature, getStyles,
-  circle, marker, overlayLegend, renderLayer
+  circle, marker, renderLayer
 } from 'js/utils/mapHelper';
 
 export default class Map extends Component {
@@ -28,12 +28,19 @@ export default class Map extends Component {
 
   componentDidMount() {
     // Intialize The Map Enviornment
+    let mapOptions = { 
+      'center': this.props.state.configuration.geoposition.split(", "),
+      'zoom': 12,
+      'layers' : new L.TileLayer( 
+          'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', 
+          { attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'} 
+        ),
+    };
     let map = new L.Map('mapid', mapOptions);
 
     document.getElementById("mapid").tabIndex = "-1";
     map.zoomControl.setPosition('topleft');
     L.control.scale({ imperial: false }).addTo(map)
-    map.addControl(new overlayLegend());
 
     // Create Search Control
     var searchControl = geocoding.geosearch({
@@ -78,7 +85,6 @@ export default class Map extends Component {
     function milesToMeters(miles) { return miles * 1069; };
     function removeRadius() { map.removeLayer(circle); };
     function removeRadiusMarker() { map.removeLayer(circle); map.removeLayer(marker); };
-
     this.setState({ map });
   }
 
@@ -88,14 +94,9 @@ export default class Map extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const { state, stateFunctions } = this.props;
 
-    // Start by getting the Legend and clearing its innerHTML
-    let legend = document.getElementsByClassName("legendContainer")[0];
-    let legendContent = ''; legend.innerHTML = '';
-
     // Map through the Layers
     let dictionaries = state.dictionaries;
     dictionaries.map( async layer => {
-
       // Information on the Component State
       let map = this.state.map;
       let mapLayers = this.state.mapLayers;
@@ -118,7 +119,6 @@ export default class Map extends Component {
       }
       // Add the layer
       else if ( newData  ){
-
         // Get the Alias
         let alias = layer.alias.replace(/_/g, " ");
         alias = alias.charAt(0).toUpperCase() + alias.slice(1);
@@ -130,7 +130,6 @@ export default class Map extends Component {
           mapLayers.push(key);
           layerStyles[key] = await getStyles(layer);
           layersData[key] = [];
-          layersData[key].unshift(newData);
         }
         
         // If its not the First Query
@@ -146,7 +145,6 @@ export default class Map extends Component {
 
         // Add New Data
         layersData[key].unshift(newData);
-
         // Compile all those variables into an object
         let renderObject = { 
           map,
@@ -155,27 +153,28 @@ export default class Map extends Component {
           alias : alias, 
           styles : layerStyles[key],
           key : key,
+          showTitle : layer.showrecordtitleinpopup,
           records : layersData[key].reduce( (a, b) =>{ return a.concat(b) } ), 
           context : layer.fields.filter((field) => { return field.righthand }),
           hover : layer.fields.filter((field) => { return field.revealonhover }),
         }
+
         // Pass that object into our Render Layer function
         let newLayer = renderLayer.call(this, renderObject );
+        newLayer.addTo(map);
         // newLayer = L.conditionalMarkers(newLayer['_layers'], {maxMarkers: 2});
 
-        let layersLegend = addLayerToLegend( layerStyles[key], alias, newLayer );  // Add Legend
-        //legend.innerHTML += layersLegend;
-        map.addControl(layersLegend)
-
+        // Add Legend
+        map.addControl(addLayerToLegend( layerStyles[key], alias, newLayer ))
 
         let rndrdDt = this.state.rndrdDt;
         rndrdDt[key] = newLayer;
-        newLayer.addTo(map)
+
         // Zoom to the location if only one thing was rendered
         if( layersData[key] && layersData[key][0].length == 1 ){
           let layer = map._layers[newLayer._leaflet_id];
           let layerId = Object.keys(layer._layers)[0];
-          let feature = layer._layers[layerId];
+          let feature = layer._layers[layerId];         
           feature.fire('click');
           //map.panBy([150, 0]);
         }
@@ -198,48 +197,48 @@ function addLayerToLegend(styles, updateLayerAlias, newLayer){
   let imageStyle = ( img ) => ( {
     'background': "url("+ img + ") no-repeat left center",
     'width': '10px',
-    'height': '10px'
+    'height': '10px',
   } )
-  let pointStyle = ( color ) => ( {
-    'background-color': color,
+  let pointStyle = ( background, border ) => ( {
+    'background': background,
     'width': '10px',
-    'height': '10px'
+    'height': '10px',
+    'border': '2px solid '+ border
   } )
 
   // Class Breaks 
   if(styles.uniqueValueInfos.length){
-    styles.uniqueValueInfos.map((field) => {
-      let element = {}
-      let label = field.label;
-      if( label == ' '){ label = 'Unassigned'}
-      element.label = label
-      element.html = ''
-      console.log(styles);
-      if(field.image){ element.style = imageStyle(field.image) }
-      else{ element.style = pointStyle(field.color) }
-      elements.push(element)
+    styles.uniqueValueInfos.map( o => {
+      let e = {}
+      let label = o.label == ' ' ? 'Unassigned' : o.label;
+      e.label = label
+      e.html = ''
+      if(o.image){ e.style = imageStyle(o.image) }
+      else{ e.style = pointStyle(o.color, o.line) }
+      elements.push(e)
     });
   }
   let label = updateLayerAlias
   if(styles.uniqueValueInfos.length){ label = 'Unassigned'}
   // Colors
   if(styles.line && styles.color){
-    let element = {}
-    element.html = ''
-    element.label = label;
-    element.style = pointStyle(styles.color)
-    elements.push(element)
+    let e = {}
+    e.html = ''
+    e.label = label;
+    e.style = pointStyle(styles.color, styles.line)
+    elements.push(e)
   }
   // Images
   if(styles.image){
-    let element = {}
-    element.html = ''
-    element.label = label;
-    element.style = imageStyle(styles.image) 
-    elements.push(element)
+    let e = {}
+    e.html = ''
+    e.label = label;
+    e.style = imageStyle(styles.image) 
+    elements.push(e)
   }
   // Update Opacity
   let updateOpacity = (layer, opacity) => {
+    console.log(layer),
     layer.eachLayer( layer => {
       typeof( layer.setOpacity ) == 'function' ?
         layer.setOpacity( opacity ) :
@@ -247,19 +246,15 @@ function addLayerToLegend(styles, updateLayerAlias, newLayer){
     });
   }
   return L.control.htmllegend({
-      position: 'bottomleft',
-      legends: [{
-          name: updateLayerAlias,
-          layer: newLayer,
-          elements: elements
-      }],
-      collapseSimple: true,
-      detectStretched: true,
-      collapsedOnInit: true,
-      disableVisibilityControl : true,
-      updateOpacity : updateOpacity,
-      defaultOpacity: 1,
-      visibleIcon: 'icon icon-eye',
-      hiddenIcon: 'icon icon-eye-slash',
+    position: 'bottomleft',
+    legends: [{
+        name: updateLayerAlias,
+        layer: newLayer,
+        elements: elements
+    }],
+        collapseSimple: true,
+        detectStretched: true,
+        visibleIcon: 'icon icon-eye',
+        hiddenIcon: 'icon icon-eye-slash'
   })
 }

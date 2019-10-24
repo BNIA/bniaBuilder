@@ -1,19 +1,31 @@
-import {fetchData, groupBy, clean} from 'js/utils/utils';
+import {fetchData, clean, sortDictionaries, serializeFormInputs} from 'js/utils/utils';
 import {BniaSearch} from 'js/utils/handles/bniaHandle';
 import {EsriSearch} from 'js/utils/handles/esriHandle';
 import {SocrataSearch} from 'js/utils/handles/socrataHandle';
+
 import Nanobar from "nanobar";
 const nanobar = new Nanobar( );
+
+
+async function getCurVals(form){
+  let vars = await serializeFormInputs(form)
+  return vars
+}
 //
 // Get all Records matching query on keypress. Query 100
 // The first entry in our object is the active field and should be searched: "select * where field like 'value%' and field[n+1] in ['%value[n+1_a]%','%value[n+1_b]%'] "
 //
 export async function getFieldSuggestion(event, dictionaries) {
+  event.preventDefault();
   startWait(nanobar)
+  let form = event.target.form;
+  console.log( event.target )
+  let keyValuePairs = await getCurVals( form );
+
   let fieldValuePairs = {};
   // Get the active Layer & Field
   let newDictionary = (typeof(dictionaries) =='undefined') ? {} : dictionaries;
-  let layer = newDictionary.filter( k => { return k.key === event.target.form.dataset.key  })[0];
+  let layer = newDictionary.filter( k => { return k.key === form.dataset.key  })[0];
 
   // Get the CurVal from the Input and store it in our dictionary.
   let activeField = layer['fields'].find( obj => { return clean(obj.name) === event.target.dataset.field } );
@@ -26,6 +38,7 @@ export async function getFieldSuggestion(event, dictionaries) {
   otherFields.map( field => { typeof(field.filter) === "boolean" ? null : (fieldValuePairs[field.name] = field.filter) } )
 
   // Construct the Query using all our CurVals.
+  nanobar.go( 70 );
   layer['currentFormsData'] = await queryDynamicDb( layer, 'getSuggestions', fieldValuePairs )
   stopWait(nanobar)
   return newDictionary
@@ -47,6 +60,9 @@ export async function handleSubmit(event, records, dictionaries) {
   let layer = newDictionary.filter( k => { return k.key === form.dataset.key  })[0];
   let fieldValuePairs = {}
 
+  // Key Value Pairs Async Test
+  let keyValuePairrs = await getCurVals(form);
+
   // Get the CurVals obtained from getFieldSuggestion.
   layer['fields'].map( field => { 
     typeof(field.filter) == "boolean" ? null : (fieldValuePairs[field.name] = field.filter) 
@@ -62,8 +78,8 @@ export async function handleSubmit(event, records, dictionaries) {
   });
 
   // Construct the Query using all our CurVals.
+  nanobar.go( 70 );
   layer['dataWithCoords'] = await queryDynamicDb( layer, 'getRecords', fieldValuePairs )
-  
   stopWait(nanobar)
   return newDictionary;
 }
@@ -75,40 +91,39 @@ export async function handleSubmit(event, records, dictionaries) {
 //
 export async function getDetails( event, state ){
   startWait(nanobar)
+  let foreignLayers = []
+  let prep = value => { return !value ? '' : value.trim().replace(/%20/g, '').replace(/\s+/g, '') }
+
   // Each record has a 'layer' attribute which points to its dictionary.
   let props = event.target.feature.properties;
   let layer = state.dictionaries.filter( dict => props.layer == dict.key )[0];
-  if (layer.layer != 'basic_prop_info'){ 
-    layer['connectedRecords'] = await queryDynamicDb( layer, 'connect', props )  
-  }
 
-  // The records dictionary contains information on connectedDictionaries which we want to retrieve information on.
-  let connectLayers = layer.connectlayers ? layer.connectlayers.split(' ') : [];
+  // Get Clicked Layers Info.
+  nanobar.go( 50 );
+  if (layer.layer != 'basic_prop_info'){ layer['connectedRecords'] = await queryDynamicDb( layer, 'connect', props )  }
+
+  // Get the Connected Dictionaries
   let connectedDictionaries = state.dictionaries.filter( dictionary => {
-    let group = dictionary.group ? dictionary.group.replace(/%20/g, '').replace(/\s+/g, '') : 'xyz';
-    let subgroup = dictionary.subgroup ? dictionary.subgroup.replace(/%20/g, '').replace(/\s+/g, '') : 'xyz';
-    let layerName = dictionary.layer ? dictionary.layer.replace(/%20/g, '').replace(/\s+/g, '') : 'xyz';
+    let group = dictionary.group ? prep( dictionary.group ) : 'NA';
+    let subgroup = dictionary.subgroup ?  prep( dictionary.subgroup ) : 'NA';
+    let layerName = dictionary.layer ?  prep( dictionary.layer ) : 'NA';
     if( (layer.layer == dictionary.layer) && (layer.host == dictionary.host)){ return false }
-    return (connectLayers.includes(group) || connectLayers.includes(subgroup) || connectLayers.includes(layerName))
+    let cL = layer.connectlayers ? layer.connectlayers.split(' ') : [];
+    return ( cL.includes(group) || cL.includes(subgroup) || cL.includes(layerName) )
   } )
-  let foreignLayers = []
-  let foriegnLayersData = await Promise.all( connectedDictionaries.map( async newlayer => { 
-    let layer = newlayer;
-    layer['connectedRecords'] = await queryDynamicDb( layer, 'connect', props );
-    foreignLayers.push(layer);
-    return { [layer.service+layer.layer+''] : layer['connectedRecords'] } 
-  }  ) );
-  let forlay = {}
-  foriegnLayersData.map( (arrAtindex, index) =>{
-    let key = Object.keys(arrAtindex);
-    forlay[key] = [arrAtindex[key] ]
-  } );
+  nanobar.go( 70 );
+  // Get the Data for the Connected Dictionaries
+  let foriegnLayersData = await Promise.all( connectedDictionaries.map( async flayer => { 
+    flayer['connectedRecords'] = await queryDynamicDb( flayer, 'connect', props );
+    foreignLayers.push(flayer);
+    return { [flayer.service+flayer.layer+''] : flayer['connectedRecords'] } 
+  }  ) )
 
   stopWait(nanobar)
   return {
     clickedRecord : event.target.feature,
     clickedLayer : layer,
-    foreignLayers,
+    foreignLayers : sortDictionaries(foriegnLayersData),
   }
 }
 
@@ -127,11 +142,15 @@ async function queryDynamicDb( layer, method, props ){
 
 
 // Functions to Toggle Loading Icons
-function startWait(){ 
+function startWait(){
+  let loader = document.getElementsByClassName("loader")[0];
+  loader.style.display = 'block';
   document.getElementsByTagName("BODY")[0].style.cursor = "wait !important"; 
   nanobar.go( 30 );
 }
 function stopWait() { 
-  document.getElementsByTagName("BODY")[0].style.cursor = "pointer";
+  let loader = document.getElementsByClassName("loader")[0];
+  loader.style.display = 'none';
+  document.getElementsByTagName("BODY")[0].style.cursor = "pointer !important";
   nanobar.go( 100 );
 }

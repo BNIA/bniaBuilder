@@ -4,17 +4,7 @@ import L from 'leaflet';
 var geocoding = require('esri-leaflet-geocoder');
 require('leaflet-responsive-popup');
 
-export const mapOptions = { 
-  'center': [39.2854197594374, -76.61796569824219],
-  'zoom': 12,
-  'layers' :
-    new L.TileLayer( 
-      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', 
-      { attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'} 
-    ),
-};
-
-// GeoCoder - Marker and Radius
+// GeoCoder - Marker and Radius upon Searching for an Address
 export const circle = L.circle([39.2854197594374, -76.61796569824219], 1000, { color: 'red', fillColor: '#f03', fillOpacity: 0.3, opacity: 0.3 });
 export const marker = L.marker([39.2854197594374, -76.61796569824219], { draggable: true }).on('dragend', e => {
     circle.setLatLng([marker.getLatLng().lat, marker.getLatLng().lng]);
@@ -26,21 +16,8 @@ export const marker = L.marker([39.2854197594374, -76.61796569824219], { draggab
     marker.openPopup();
 });
 
-// Create The Legend
-export const overlayLegend = L.Control.extend( {
-  options: { position: 'bottomleft' },
-  onAdd: map => {
-    var container = L.DomUtil.create('div');
-    container.className = "leaflet-bar leaflet-control leaflet-control-custom legendContainer";
-    container.innerHTML = '';
-    return container;
-  }
-} ); 
-
-
 // Get Styles
 export async function getStyles(layer) {
-  
   let type = false; let field = false; 
   let line = false; let color = false; 
   let image = false;
@@ -49,6 +26,7 @@ export async function getStyles(layer) {
   let styles = drawingInfo.renderer;
   let uniqueValueInfos = [];
   let transparency = 100;
+  let weight = 4
 
   let prepareColor = (color, trans) => {
     if ( color[3] && color[3] != 0 ){
@@ -59,7 +37,7 @@ export async function getStyles(layer) {
   // Esri Layer
   if(geometryType && geometryType.substring(0, 4) == 'esri'){
     let labelingInfo = drawingInfo.labelingInfo;
-    transparency = ((100-drawingInfo.transparency)/100);
+    transparency = 1-drawingInfo.transparency/100;
     type = styles.type;
 
     // ESRI POINTS
@@ -97,10 +75,12 @@ export async function getStyles(layer) {
         // console.log('Geom - classBreaks')
         field = styles.field;
         styles.classBreakInfos.map((classBreak) => {
+          weight = classBreak.symbol.outline.width;
           uniqueValueInfos.push(
             { 
-            line : prepareColor(classBreak.symbol.outline.color, transparency),
             color : prepareColor( classBreak.symbol.color, transparency),
+            line : prepareColor( classBreak.symbol.outline.color, transparency),
+            weight : classBreak.symbol.outline.width,
             label : classBreak.label,
             description : classBreak.description,
             classMaxValue : classBreak.classMaxValue
@@ -111,8 +91,10 @@ export async function getStyles(layer) {
       // Simple Design -> Neighborhoods, Watersheds, etc
       else if (type == 'simple') {
         //console.log('Geom - Simple', layer)
-        color = prepareColor( styles.symbol.outline.color, transparency );
-        line = prepareColor( styles.symbol.color, transparency );
+        // width = styles.symbol.outline.width
+        weight = styles.symbol.outline.width;
+        color = prepareColor( styles.symbol.color, transparency );
+        line = prepareColor( styles.symbol.outline.color, transparency );
       } 
     }
   }
@@ -120,9 +102,16 @@ export async function getStyles(layer) {
 
   // Style from the Config
   if( drawingInfo && !styles ){
-    geometryType = 'point';
+    geometryType = 'Point';
     const imagee = require('images/drawinginfo/'+drawingInfo)
     if(imagee){ image = imagee }
+  }
+
+  if(!geometryType){
+    geometryType = layer.dataWithCoords[0].geometry.type;
+    line = 'blue';
+    color = 'blue';
+    weight = 2;
   }
 
   return {
@@ -133,6 +122,7 @@ export async function getStyles(layer) {
     'line' : line, 
     'color' : color, 
     'image' : image,
+    'weight' : weight
   }
 }
 
@@ -142,31 +132,36 @@ function getPopupInnerContent(marker, renderObject ){
   let name = false;
   let address = false;
   let matched = [ false, false]
-  if( (hovered.name)  && hovered.name    != ' ' ){ name = hovered.name; matched[0]='name';}
-  if( (hovered.Name)  && hovered.Name    != ' ' ){ name = hovered.Name; matched[0]='Name';}
-  if( (hovered.NAME)  && hovered.NAME    != ' ' ){ name = hovered.NAME; matched[0]='NAME';}
-  if( hovered.address && hovered.address != ' ' ){ address = hovered.address; matched[1]='address';}
-  if( hovered.ADDRESS && hovered.ADDRESS != ' ' ){ address = hovered.ADDRESS; matched[1]='ADDRESS';}
+  
   let details = renderObject.hover.map( (field, index) => {
-    if(matched[0] && field.name == matched[0] ){ return null }
-    if(matched[1] && field.name == matched[1] ){ return null }
-    let alias = field.alias;
-    return ( "<b>"+ alias +"</b> : "+ hovered[field.name.trim()]+"</br>")
+  // Show either Name or Address first thing if they exist
+    if( (hovered.name)  && hovered.name    != ' ' ){ name = hovered.name; return null}
+    if( (hovered.Name)  && hovered.Name    != ' ' ){ name = hovered.Name; return null}
+    if( (hovered.NAME)  && hovered.NAME    != ' ' ){ name = hovered.NAME; return null}
+    if( hovered.address && hovered.address != ' ' ){ address = hovered.address; return null}
+    if( hovered.ADDRESS && hovered.ADDRESS != ' ' ){ address = hovered.ADDRESS; return null}
+    return ( "<b>"+ field.alias +"</b> : "+ hovered[field.name.trim()]+"</br>")
   } )
-  !name ? null: details.unshift("<b>Given Name</b> : "+name+"</br>")
+
+  // Show the title name and address
+  !name ? null: details.unshift("<b>Name</b> : "+name+"</br>")
   !address ? null: details.unshift("<b>Address</b> : "+address+"</br>")
-  details.unshift("<h3>"+renderObject.alias+"</h3>")
+  renderObject.showTitle ? details.unshift("<h4>"+renderObject.alias+"</h4>") : null;
+
+  // Stringify it all
   details = details.join('')
+
   return details;
 }
 
 // ONHOVER
 export function hoverEvent(event, renderObject ){
+  let weight = renderObject.styles.weight * 5
   let marker = event.target;
   if(renderObject.layer.hoverinfo){
     let details = getPopupInnerContent(marker, renderObject )
     !details.length ? null : marker.bindTooltip(''+details).openTooltip();
-    if( typeof(marker.setStyle) == 'function' ){ marker.setStyle({ weight: 8 } ) }
+    if( typeof(marker.setStyle) == 'function' ){ marker.setStyle({ weight: weight } ) }
   }
 }
 
@@ -183,15 +178,15 @@ function onFeatureClick (event, renderObject) {
     document.getElementById('context_drawer').style.display = 'flex',
     renderObject.stateFunc.showDetails(event)
   )
-  
+
   // zoomonclick
   if (renderObject.layer.zoomonclick){
-    if( typeof( marker.getLatLng ) == 'function' ){console.log('gah', marker.getLatLng());
+    if( typeof( marker.getLatLng ) == 'function' ){
       var latLngs = [ marker.getLatLng() ];
       var markerBounds = L.latLngBounds(latLngs);
       map.fitBounds(markerBounds);
     }
-    else if( typeof( marker.getBounds ) == 'function' ){console.log('sAH', marker.getBounds());
+    else if( typeof( marker.getBounds ) == 'function' ){
       let zoomPosition = marker.getBounds()
       let zoomPadding = { paddingTopLeft: [50, 0], paddingBottomRight: [50, 0] }
       map.fitBounds ( zoomPosition, zoomPadding );
@@ -209,16 +204,22 @@ function onFeatureClick (event, renderObject) {
 
 // RENDER LAYER
 export function renderLayer( renderObject ) {
+
   let layer = renderObject.layer
   let styles = renderObject.styles;
   let alias = renderObject.alias;
   let layerKey = renderObject.key
   let updateLayerRecords = renderObject.records;
   let stateFunctions =  renderObject.stateFunc;
-  let showOnHovers = renderObject.hover;  
+  let showOnHovers = renderObject.hover; 
+ 
   // Description : This will render each unit of information as a point
-  if (styles.geometryType == "esriGeometryPoint" || styles.geometryType == 'point' || renderObject.layer.name == 'property_details') {
-    updateLayerRecords = updateLayerRecords.filter(rec => { return rec.geometry.coordinates ? rec.geometry.coordinates[0] != undefined : rec.geometry.rings[0] != undefined } )
+  if (styles.geometryType == "esriGeometryPoint" || styles.geometryType == 'Point' || renderObject.layer.name == 'property_details') {
+
+    updateLayerRecords = updateLayerRecords.filter(rec => {
+      return rec.geometry.coordinates ? rec.geometry.coordinates[0] != undefined : rec.geometry.rings[0] != undefined 
+    } )
+
     return L.geoJSON(
       updateLayerRecords, 
       { 
@@ -246,7 +247,8 @@ export function renderLayer( renderObject ) {
     )
   }
   // RENDER GEOMETRY : 
-  if (styles.geometryType == "esriGeometryPolygon") {
+  if (styles.geometryType == "esriGeometryPolygon" || styles.geometryType == 'Polygon') {
+    let weight = renderObject.styles.weight
     return L.geoJSON(
       updateLayerRecords, 
       {
@@ -254,7 +256,7 @@ export function renderLayer( renderObject ) {
           feature.properties['layer'] = layerKey;
           layer.on({
             mouseover: event => { hoverEvent(event, renderObject) }, 
-            mouseout: event => { event.target.setStyle({ weight: 4 }) }, 
+            mouseout: event => { event.target.setStyle({ weight: weight }) }, 
             click: event => {  onFeatureClick(event, renderObject) }, 
           }); 
         },
@@ -269,9 +271,15 @@ export function renderLayer( renderObject ) {
               const index = styles.uniqueValueInfos.findIndex(filter => filter.classMaxValue >= actualValue );
               color = styles.uniqueValueInfos[index].color;
               line = styles.uniqueValueInfos[index].line;
-            } return { fillColor: color, color: line, fillOpacity:1 }
+            } return { fillColor: color, color: line, fillOpacity:1, weight:weight }
           }
           else if (styles.type == 'simple') { return { fillColor: styles.color, color: styles.line, fillOpacity:1 } }
+          if(styles.type == false){ 
+            // Bnia Geometry 
+            let line = styles.line;
+            let color = styles.color;
+            return { fillColor: color, color: line, fillOpacity:1, weight:weight } 
+          }
         }
       }
     )

@@ -1,10 +1,16 @@
 import React, {Component} from 'react';
-import Form from 'js/components/local/Form.js'
+import Form from 'js/components/local/forms/Form.js'
 
 // Input : Layer, state, stateFunctions
 // Output - Submit Event, Suggestion Event, Drawer fields setup as Inputs.
 // Description : This Component is used in the Navigation Panel. 
 // It is called once for every Layer of Data to construct a form.
+
+//
+// Called from Navigation
+// Calls Form
+//
+
 export default class Details extends Component {
   displayName: 'Details';
   constructor(props) {
@@ -22,7 +28,7 @@ export default class Details extends Component {
 
   // Prepare the Form
   async updateForm( ){
-    // START - Translate Array->Object(key:value) Object->(key:array)
+    // START - Translate Array->Object(key:value) to Object->(key:array)
     let layer = this.props.layer;
     let update = false;
     let suggestions = layer.fields.map( (field, i) => {
@@ -73,12 +79,12 @@ if ( layer.host == 'socrata' ){ console.log(uniqueAndSorted) };
     // Otherwise show the 'Go' and 'Search' Buttons
     let goButton = !layer.labelbutton ? '':
       <button className='GoButton fa fa-angle-double-right'
-       onClick={stateFunctions.submitted}
+       onClick={stateFunctions.handleSubmit}
        title='Search Layer'
        data-key={layer.key} />;
     let searchButton = !layer.searchfields ? '' :
       <button type='submit' className='searchButton'
-        onClick={stateFunctions.submitted}
+        onClick={stateFunctions.handleSubmit}
         title='Search!'
         data-key={layer.key} >
         Search!
@@ -113,19 +119,3 @@ if ( layer.host == 'socrata' ){ console.log(uniqueAndSorted) };
       </details>
   }
 }
-
-/*
-  // Always update the first time
-  if( !this.state.prepairedData ){ update = true }
-  else if( !update ){  
-    // check each field
-    let obj = m.data.prepairedData;
-    console.log(obj)
-    Object.keys(obj).map( (key, index) => {
-      ( 
-        ( typeof(this.state.prepairedData[index]) != 'undefined'  ) && 
-        ( obj[index].length != this.state.prepairedData[index].length ) 
-      ) ? update = true : ''
-    } )
-  }
-*/
