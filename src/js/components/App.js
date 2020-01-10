@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {fetchData} from 'js/utils/utils';
 import Body from 'js/components/global/Body';
+import Modal from 'js/components/global/Modal';
 import Header from 'js/components/global/Header';
 import {getFieldSuggestion, handleSubmit, getDetails, handleReset} from 'js/utils/search'
 import * as myConfig from '../../json_config.json';
@@ -80,25 +81,30 @@ async handleChange(event){
     let sessionId = await fetchData('./api?purpose=visiting');
     let loginRequired = this.state.configuration.loginRequired;
     // this.state.configuration.speech ? await import('js/utils/annyang.min.js') : ''; 
-    /* Code Splitting works but now only request the resources on button click */
-    const Account = this.state.auth.loginEnabled == 'false' ? false : await import (/* webpackChunkName: "account" */ 'js/components/global/Account');
-    const BigModal = this.state.configuration.showAllRecordsBtn == 'false' ? false : await import(/* webpackChunkName: "bigmodal" */ 'js/components/global/BigModal');
+    /* Code Splitting works and now only request the resources on button click */
+    const Account = this.state.auth.loginEnabled == 'false' ? false : 
+      await import (/* webpackChunkName: "account" */ 'js/components/global/Account');
+    const BigModal = this.state.configuration.showAllRecordsBtn == 'false' ? false : 
+      await import(/* webpackChunkName: "bigmodal" */ 'js/components/global/BigModal');
     this.setState( { Account : Account.default , BigModal : BigModal.default } )
   }
   //
   // Load the Header and Body. As well Account/ Bigmodal conditionally
   //
   render () { 
+    let state = this.state
+    let stateFunctions = this.stateFunctions
     let returnThis = [
-      <Header key='header' state={this.state}  modal={this.state.modals} appName={this.state.configuration.longName} />,
-      <Body key='body' stateFunctions={this.stateFunctions} state={this.state} />
+      <Header key='header' state={state} />,
+      <Modal key='modal' state={state} />,
+      <Body key='body' stateFunctions={stateFunctions} state={state} />
     ]
-    if(this.state.auth.loginRequired && this.state.auth.loginEnabled && this.state.Account){
-      returnThis.push( <this.state.Account key='account' stateFunctions={this.stateFunctions} state={this.state}/> 
+    if(state.auth.loginRequired && state.auth.loginEnabled && state.Account){
+      returnThis.push( <state.Account key='account' stateFunctions={stateFunctions} state={state}/> 
       ) 
     }
-    if(this.state.details && this.state.configuration.showAllRecordsBtn && this.state.BigModal){ 
-      returnThis.push(<this.state.BigModal key='bigModal' state={this.state}/> 
+    if(state.details && state.configuration.showAllRecordsBtn && state.BigModal){ 
+      returnThis.push(<state.BigModal key='bigModal' state={state}/> 
       ) 
     }
     return <div style={style}> { returnThis } </div>

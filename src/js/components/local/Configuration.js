@@ -8,6 +8,18 @@ import { saveAs } from 'file-saver';
 const e = React.createElement;
 import Details from 'js/components/local/Details';
 
+/*
+#File: Configuration.js
+#Author: Charles Karpati
+#Date: Jan 2020
+#Section: 
+#Email: karpati1@umbc.edu
+#Description:  Editing the configuration file
+#Purpose: Allows for reconfiguration and review
+#input: 
+#output: 
+*/
+
 export default class Configuration extends React.Component{
   constructor(props) {
 	super(props);
@@ -35,29 +47,8 @@ export default class Configuration extends React.Component{
     this.setState( {dictionaries, configuration, modals, style, theme } );
   } componentDidMount(){ this.update() }
 
-  // activeLayer
-  // 
-  setLayer(e){
-  	let {activeLayer} = this.state
-  	let target = e.target.nodeName == 'B' ? e.target.parentElement : e.target;
-  	let newVal = target.dataset.detail
-  	if( activeLayer.includes(newVal) ){ activeLayer = activeLayer.filter(e => e !== newVal)}
-  	else{ activeLayer.push( newVal ) }
-  	this.setState( {activeLayer} )
-  	console.log('setLayer', activeLayer)
-  	this.update()
-  }
+  onInputChange(e){
 
-  // activeDetails
-  // 
-  setDetails(e){
-  	let {activeDetails} = this.state
-  	let target = e.target.nodeName == 'B' ? e.target.parentElement : e.target;
-  	let newVal = target.dataset.detail
-  	if( activeDetails.includes(newVal) ){ activeDetails = activeDetails.filter(e => e !== newVal)}
-  	else{ activeDetails.push( newVal ) }
-  	this.setState( {activeDetails} )
-  	this.update()
   }
 
   //
@@ -92,31 +83,6 @@ export default class Configuration extends React.Component{
   	  	let field = dict.filter(e => e.name == layerName)[0] 
   	  } 
   	} 	
-  }
-
-  //
-  // Download the ConfigDoc
-  //
-  download() {
-
-    // Seperate Layers and Fields
-    let fields = []
-    let layers = this.state.dictionaries.map( layer => {
-      layer.fields.map( field => { fields.push( field ) } )
-      delete layer.fields
-      layer['drawinginfo'] = JSON.stringify( layer['drawinginfo'] )
-      return layer
-    } );
-
-    // Download as Zip
-	var zip = new JSZip();
-    zip.file("spec_layers.csv", convertArrayOfObjectsToCSV( layers ) );
-  	zip.file("spec_fields.csv", convertArrayOfObjectsToCSV( fields ) );
-    zip.file("spec_style.csv", convertArrayOfObjectsToCSV( [ this.state.style ] ) );
-  	zip.file("spec_theme.csv", convertArrayOfObjectsToCSV( [ this.state.theme ] ) );
-   	zip.file("spec_modals.csv", convertArrayOfObjectsToCSV( this.state.modals )) ;
-    zip.file("spec_configuration.csv", convertArrayOfObjectsToCSV( [ this.state.configuration ] ) );
-    zip.generateAsync({type:"blob"}).then(function(content) { saveAs(content, "website_config.zip");  } );
   }
 
   //
@@ -211,8 +177,68 @@ export default class Configuration extends React.Component{
 	let returnThis = [renderedDictionaries, renderedConfiguration, renderedStyle, renderedTheme, download];
     this.setState( { rendered : returnThis } )
   }
+
+
+  //
+  // Download the ConfigDoc
+  //
+  download() {
+
+    // Seperate Layers and Fields
+    let fields = []
+    let layers = this.state.dictionaries.map( layer => {
+      layer.fields.map( field => { fields.push( field ) } )
+      delete layer.fields
+      layer['drawinginfo'] = JSON.stringify( layer['drawinginfo'] )
+      return layer
+    } );
+
+    // Download as Zip
+	var zip = new JSZip();
+    zip.file("spec_layers.csv", convertArrayOfObjectsToCSV( layers ) );
+  	zip.file("spec_fields.csv", convertArrayOfObjectsToCSV( fields ) );
+    zip.file("spec_style.csv", convertArrayOfObjectsToCSV( [ this.state.style ] ) );
+  	zip.file("spec_theme.csv", convertArrayOfObjectsToCSV( [ this.state.theme ] ) );
+   	zip.file("spec_modals.csv", convertArrayOfObjectsToCSV( this.state.modals )) ;
+    zip.file("spec_configuration.csv", convertArrayOfObjectsToCSV( [ this.state.configuration ] ) );
+    zip.generateAsync({type:"blob"}).then(function(content) { saveAs(content, "website_config.zip");  } );
+  }
+
+
+  // activeLayer
+  // activeDetails
+  // 
+  setDetails(e){
+  	let {activeDetails} = this.state
+  	let target = e.target.nodeName == 'B' ? e.target.parentElement : e.target;
+  	let newVal = target.dataset.detail
+  	if( activeDetails.includes(newVal) ){ activeDetails = activeDetails.filter(e => e !== newVal)}
+  	else{ activeDetails.push( newVal ) }
+  	this.setState( {activeDetails} )
+  	this.update()
+  }
+
+  // 
+  setLayer(e){
+  	let {activeLayer} = this.state
+  	let target = e.target.nodeName == 'B' ? e.target.parentElement : e.target;
+  	let newVal = target.dataset.detail
+  	if( activeLayer.includes(newVal) ){ activeLayer = activeLayer.filter(e => e !== newVal)}
+  	else{ activeLayer.push( newVal ) }
+  	this.setState( {activeLayer} )
+  	console.log('setLayer', activeLayer)
+  	this.update()
+  }
+  
+
   render(){ return this.state.rendered }
 }
+
+
+
+
+
+
 
 
 // Created for use in the update function.

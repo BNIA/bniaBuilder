@@ -14,6 +14,7 @@ import 'css/critical.css';
 // The script also starts up a service worker and push notifications (I think they may not be working a the moment) 
 #input: Nothin
 #output: The Application and a Service Worker
+
 */
 
 ReactDOM.render( <App />, document.querySelector("#start-app") );

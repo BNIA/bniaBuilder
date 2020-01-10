@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import Modal from 'js/components/global/Modal';
 
 const e = React.createElement;
 
@@ -32,9 +31,13 @@ export default class Header extends Component {
     let navigationLabel = state.configuration.navigationLabel;
 
     // The Modal Components onClick Event listener acts on these Menu labels. These are just the buttons.
-    let menuContent = !modals ? '' : modals.map(function(x, i){
+    let menuContent = !modals ? '' : modals.map( (x, i) => {
       if(x.buttonlabel != ''){ return (
-        e('button', { key:i, className: 'open_modal', modalid:'modal_'+x.modalheader , title:'Click for more'}, x.modalheader.replace(/_/g, ' ') )
+        e('button', { key:i, 
+          className: 'open_modal', 
+          modalid:'modal_'+x.modalheader , 
+          title:'Click for more'
+          }, x.modalheader.replace(/_/g, ' ') )
       ) }
     }) 
     
@@ -51,7 +54,6 @@ export default class Header extends Component {
     return (
       <header>
         <menu id='header_menu'>
-          <Modal modal={state.modals} appName={state.configuration.longName}/>
           <figure> 
             <img alt={logo + 'logo'} src={location} title={'Logo Image'} className="hidden-md-down" style={{ textAlign: 'left', position: 'absolute', left: '5px', top : '2px', height: '30px' } } /> 
           </figure>
@@ -89,7 +91,6 @@ function addHeaderListeners(){
     var context_drawer = document.getElementById('context_drawer');
 
     if (event.target.id == 'toggle_header_menu') {
-      console.log('FUCK', header_menu.style.display )
       let disp = header_menu.style.display;
       if(disp === 'flex' || disp == ''){
         context_drawer.style.top = '50px';

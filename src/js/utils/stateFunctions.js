@@ -46,7 +46,7 @@ export async function account_login(event){
       auth['loggedIn'] = true
       auth['userInfo'] = update[0]  }
     else{ auth['loggedIn'] = update[0]; }
-    console.log(auth['loggedIn'])
+    console.log("auth['loggedIn'] : ", auth['loggedIn'])
     this.setState( { auth } );
   }
   // Change Password

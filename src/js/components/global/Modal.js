@@ -2,6 +2,18 @@ import React, { Component } from 'react';
 const e = React.createElement;
 import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 
+/*
+#File: App.js
+#Author: Charles Karpati
+#Date: Jan 2020
+#Section: 
+#Email: karpati1@umbc.edu
+#Description: The  component. Called from Header.js 
+#Purpose:  
+#input: 
+#output: 
+*/
+
 export default class Modal extends Component {
   displayName: 'Modal';
   constructor(props) {
@@ -12,9 +24,12 @@ export default class Modal extends Component {
   componentDidMount() { addModalListeners()  }
   shouldComponentUpdate(nextProps, nextState){ return false }
   render() {
-    const { modal, appName } = this.props;
+    const { state } = this.props;
+    let appName = state.configuration.longName
+    let modals = state.modals
+
 	// Get all the modals
-	let modalContents = modal.map(function(modalContent, i) {
+	let modalContents = modals.map(function(modalContent, i) {
 	  return ( 
 	    < ModalContent key = { i } 
 	      properties = { modalContent } 
@@ -25,7 +40,7 @@ export default class Modal extends Component {
 
     // If not empty, create the Dropshadow and call the modal
     return !modalContents ? null : ( 
-      < div className = "modal_wrapper" style={modal.style} >
+      < div className = "modal_wrapper" style={modals.style} >
         { modalContents }
       < /div >
     )
