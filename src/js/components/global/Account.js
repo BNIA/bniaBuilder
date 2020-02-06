@@ -67,8 +67,7 @@ export default class Account extends Component {
     if( resp == null){return null}
     else{
       resp.map( sheet => { jsonObject[sheet.title] = sheet.entry } )
-      console.log('LOOK AT THIS', resp )
-      console.log('LOOK AT THAT', jsonObject )
+      console.log('dictionary', jsonObject )
       let filledDictionaries = await fillDictionaries(jsonObject.layers);
       jsonObject.dictionaries = filledDictionaries;
       delete jsonObject.layers;
@@ -89,14 +88,13 @@ export default class Account extends Component {
     	maxHeight: '400px',
     	overflow: 'auto',
     }
-
     if( loginEnabled && loggedOut ){ 
       // Image
       let logo = <img src={state.configuration.image} key='accLoginImg' alt="Site Logo"/>
       innerContent.push(logo);
 
       // Log In
-      let login_status = state.auth['loggedIn']
+      let login_status = state.auth.loggedIn
       let account_login =
         <details key='details' open>
           <summary>Login</summary>
@@ -167,8 +165,9 @@ export default class Account extends Component {
 	  innerContent.push(account_logout)
 
       // Logout
-      let close_menu = <button key='closeAccountModal' className = "toggle_view close_account_modal" tabIndex = "0" > Close Menu < /button> 
+      let close_menu = <button key='closeAccountModal' className = "toggle_view close_account_modal" tabIndex = "0" > Close Menu </button> 
 	  innerContent.push(close_menu)
+
 
       // Image
       let logo = <img src={state.configuration.image} key='accLoginImg' alt="Site Logo"/>
