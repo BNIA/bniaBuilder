@@ -10,7 +10,7 @@
 }
 .dropbtn {
 	color:				var(--font-col1);
-	background-color:	var(--bgcolor2);
+	background:	var(--bgcolor2);
     min-width:			80px;
 	transition:			1s color;
 	cursor:				pointer;
@@ -20,7 +20,7 @@
 	display:			inline-block;
 }
 .dropbtn:hover{
-	background-color:	var(--bgcolor2); 
+	background:	var(--bgcolor2); 
     color:				var(--font-col1);
 }
 .dropdown-content {
@@ -32,19 +32,19 @@
     box-shadow:			var(--box-shadow-light);
 }
 .dropdown-content a:hover { 
-	background-color:	var(--bgcolor2);
+	background:	var(--bgcolor2);
     box-shadow:			var(--box-shadow-medium);
     color:				var(--font-col2-hover);
 }
 .dropdown-content a {
-    background-color:	var(--bgcolor4);
+    background:	var(--bgcolor4);
     color:				var(--font-col2);
     display: 			block;
     padding:			10px;
 }
 .dropdownSpacer {
 	opacity:.5; 
-	display:inline-block;height:20px;width:2px; background-color:black; border-radius:100px;
+	display:inline-block;height:20px;width:2px; background:black; border-radius:100px;
 }
 
 

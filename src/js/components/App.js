@@ -1,108 +1,88 @@
 import React, {Component} from 'react';
-
+import {fetchData} from 'js/utils/utils';
 import Body from 'js/components/global/Body';
 import Header from 'js/components/global/Header';
-import Modal from 'js/components/global/Modal';
-import BigModal from 'js/components/global/BigModal';
-
-import {handleChange, handleSubmit, showDetails, handleReset} from 'js/utils/search'
+import {getFieldSuggestion, handleSubmit, getDetails} from 'js/utils/search'
 import * as myConfig from '../../json_config.json';
+import * as authRules from '../../auth_rules.json';
+let style = { ...myConfig.style, ...myConfig.theme };
+let config = Object.assign(myConfig, authRules);
+config = Object.assign(myConfig, { activeModal : "Welcome" });
+
+/*
+#File: App.js
+#Author: Charles Karpati
+#Date: Feb 2019
+#Section: Bnia
+#Email: karpati1@umbc.edu
+#Description: The root component. Called from Main.js 
+#Purpose: Loads needed components, passes down needed functions to components, handles state 
+#input: Fetch utility, [Body, Header, BigModal, Account] components, configuration/authRules 
+#output: The Website
+*/
+
+import {account_login, account_logout, account_update, account_recovery, account_create, handleRemove, handleChange, handleReset, showDetails} from 'js/utils/stateFunctions'
 
 export default class App extends Component {
   displayName: 'App';
+
+  //
+  // The state is passed from the config doc
+  // All major application functionalities are listed here
+  // we stuff all state-altering functions into the 'stateFunctions' object 
+  // so that they may be passed down components for calling
+  //
+  // handleReset : this.handleReset.bind(this), is used if the bound function is a method.
   constructor(props) {
     super(props);
-    this.handleRemove = this.handleRemove.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleReset = this.handleReset.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.showDetails = this.showDetails.bind(this);
-    this.state = myConfig
-  }
-
-  // Remove a field from the Clicked Layers component.
-  async handleRemove(event){
-    let key = event.target.dataset.key;
-    let layer = this.state.dictionaries.filter(function(k) { return k.key === key  })[0];
-    let recordId = layer.host+'&'+layer.service+'&'+layer.layer;
-    let newRecords = this.state.records;
-    delete newRecords[recordId]
-    console.log('HEEEEYO');
-    console.log(this.state.records)
-    console.log(newRecords);
-    this.setState({ records: newRecords });
-  }
-
-  // Query & Fetch data after a Form is submitted.
-  async handleSubmit(event){
-    document.getElementsByTagName("BODY")[0].style.cursor = "wait";
-    let updates = await handleSubmit(event, this.state.records, this.state.dictionaries);
-    document.getElementsByTagName("BODY")[0].style.cursor = "pointer";
-    this.setState({ records: updates });
-  }
-
-  // Query & Fetch Search Suggestion as the user engages with a Form Input.
-  async handleChange(event){
-    document.getElementsByTagName("BODY")[0].style.cursor = "wait";
-    let update = await (handleChange(event, this.state.dictionaries) );
-    document.getElementsByTagName("BODY")[0].style.cursor = "pointer";
-    this.setState({ dictionaries: update });
-  }
-
-  // Remove all Suggestions for the DataSet
-  async handleReset(event){
-    document.getElementsByTagName("BODY")[0].style.cursor = "wait";
-    let update = await (handleReset(event, this.state.dictionaries) );
-    document.getElementsByTagName("BODY")[0].style.cursor = "pointer";
-    console.log(update);
-    this.setState({ dictionaries: update });
-  }
-
-  // Query & Fetch Search Suggestion as the user engages with a Form Input.
-  async handleChange(event){
-    document.getElementsByTagName("BODY")[0].style.cursor = "wait";
-    let update = await (handleChange(event, this.state.dictionaries) );
-    document.getElementsByTagName("BODY")[0].style.cursor = "pointer";
-    this.setState({ dictionaries: update });
-  }
-
-  // Query & Fetch additional information for a specific record.
-  async showDetails(event){
-    document.getElementsByTagName("BODY")[0].style.cursor = "wait";
-    let update = await ( showDetails(event.target.feature, this.state ) );
-    document.getElementsByTagName("BODY")[0].style.cursor = "pointer";
-    this.setState({
-      clickedField: event, 
-      feature : update.feature,
-      featuresDictionary : update.featuresDictionary,
-      featuresConnectedDictionaries : update.featuresConnectedDictionaries
-    });
-  }
-
-  // Toggles Text to Speach
-  componentDidMount(){ this.state.configuration.speech ? ( require('js/utils/annyang.min.js') ) : null }
-
-  render () {
-    // These functions are crucial for the app to work.
-    let stateFunctions = {
-      inputChange : this.handleChange, 
-      submitted : this.handleSubmit, 
-      removed : this.handleRemove,
-      reset : this.handleReset, 
-      showDetails : this.showDetails
+    this.stateFunctions = {
+      account_login : account_login.bind(this),
+      account_logout : account_logout.bind(this),
+      account_update : account_update.bind(this),
+      account_recovery : account_recovery.bind(this),
+      account_create : account_create.bind(this),
+      inputChange : handleChange.bind(this),
+      handleReset : handleReset.bind(this),
+      handleSubmit : handleSubmit.bind(this),
+      handleRemove : handleRemove.bind(this),
+      showDetails : showDetails.bind(this),
+      activeModal : this.activeModal.bind(this)
     };
+    this.state = config
+  }
 
-    // CSS Variables allow for dynamic Style and Theming.
-    let merge = {...this.state.style, ...this.state.theme}
-    let bigModal = !this.state.configuration.showAllRecordsBtn ? '' : <BigModal state={this.state} />
-    if (navigator.appName == 'Microsoft Internet Explorer' || !!(navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/))){ alert("Please dont use IE."); }
-    return (
-    <div style={merge}>
-        <Modal modal={this.state.modals} appName={this.state.configuration.longName}/>
-        { bigModal }
-        <Header state={this.state} />
-        <Body stateFunctions={stateFunctions} state={this.state}/>
-    </div>
-    );
+  async activeModal(activeModal){ 
+    // console.log('Clicked Event: ', activeModal)
+    this.setState( { activeModal } )
+  }
+  //
+  // Load the Login / BigModal components if config doc says so.
+  //
+  async componentDidMount(){ 
+    let sessionId = await fetchData('./api?purpose=visiting');
+    let loginRequired = this.state.configuration.loginRequired;
+    // this.state.configuration.speech ? await import('js/utils/annyang.min.js') : ''; 
+    /* Code Splitting works and now only request the resources on button click */
+    const Account = this.state.auth.loginEnabled == 'false' ? false : 
+      await import (/* webpackChunkName: "account" */ 'js/components/global/Account');
+    const BigModal = this.state.configuration.showAllRecordsBtn == 'false' ? false : 
+      await import(/* webpackChunkName: "bigmodal" */ 'js/components/global/BigModal');
+    this.setState( { Account : Account.default , BigModal : BigModal.default } )
+  }
+  //
+  // Load the Header and Body. As well Account/ Bigmodal conditionally
+  //
+  render () { 
+    let state = this.state
+    let stateFunctions = this.stateFunctions
+    let returnThis = [
+      <Header key='header' stateFunctions={stateFunctions} state={state} />,
+      <Body key='body' stateFunctions={stateFunctions} state={state} />
+    ]
+    if(state.details && state.configuration.showAllRecordsBtn && state.BigModal){ 
+      returnThis.push(<state.BigModal key='bigModal' state={state}/> 
+      ) 
+    }
+    return <div style={style}> { returnThis } </div>
   }
 }

@@ -7,21 +7,21 @@
  |_|  |_|______/_/    \_\_____/|______|_|  \_\
 
 */
-#modal_Welcome {
-  display:block
+
+.bar {
+  background: white;
 }
 /* Big Screens */
 @media all and (min-width: 801px) {
   #toggle_header_menu { display: none; }  
   header{ height: 85px; }
-  #header_menu{  display: flex; }
-
+  header menu{  display: flex !important}
 }
 /* Small Screens */
 @media all and (max-width: 801px) {
-  #header_menu{  display: none; }
 }
-#header_menu {
+header menu{  display: flex}
+header menu {
   flex: 100%;
   height : 35px;
   flex-flow: row nowrap;
@@ -29,8 +29,50 @@
   overflow: hidden;
   padding: auto;
 }
+header menu button{
+  padding: .25rem;
+  color: var(--header-menu-button_color);
+  background: var(--header-menu-button_background);
+  font-size : var(--header-menu-button_font-size);
+}
+header menu button:hover{
+  color: var(--header-menu-button_color_hover);
+  background: var(--header-menu-button_background_hover);
+}
+header menu button:active{
+  color: var(--header-menu-button_color_active);
+  background: var(--header-menu-button_background_active);
+}
+header menu button:focus{
+  color: var(--header-menu-button_color_focus);
+  background: var(--header-menu-button_background_focus);
+}
+
+/* Toggle Nav , Header Menu */
+#toggle_header_menu,
+#toggle_nav{
+  background: var(--header_background-color);
+  color: var(--header-color);
+}
+#toggle_header_menu:hover,
+#toggle_nav:hover{
+  background: var(--header_background_hover);
+  color: var(--header_color_hover);
+}
+#toggle_header_menu:active,
+#toggle_nav:active{
+  background: var(--header_background_active);
+  color: var(--header_color_active);
+}
+#toggle_header_menu:focus,
+#toggle_nav:focus{
+  background: var(--header_background_focus);
+  color: var(--header_color_focus);
+}
+
 
 header figure{
+  color : var(--header-color);
   margin: auto;
   font-size : var(--header-figure_font-size);
   font-weight: var(--header-figure_font-weight);
@@ -39,17 +81,17 @@ header figure{
 header figure img{
   width : auto
 }
-header menu button{
-  padding: .25rem;
-  color: var(--header-menu-button_color);
-  font-size : var(--header-menu-button_font-size);
-}
-#toggle_header_menu{ font-size : var(--toggle_header_menu_font-size); }
 
-.toggle_nav{
+#toggle_nav{
   font-size : var(--toggle_nav_font-size);
   height:100%;
 }
+
 nav .dropdown_content{ z-index: 3;}
 
 nav{ height:50px; }
+
+header{ 
+  cursor:default;
+  border-bottom: var(--header_border-bottom);
+}

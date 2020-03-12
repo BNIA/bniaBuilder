@@ -1,178 +1,121 @@
 import React, {Component} from 'react';
+import Form from 'js/components/local/forms/Form.js'
 
+// Input : Layer, state, stateFunctions
+// Output - Submit Event, Suggestion Event, Drawer fields setup as Inputs.
+// Description : This Component is used in the Navigation Panel. 
+// It is called once for every Layer of Data to construct a form.
 
-// This Component is used in the Navigation Panel. It is called on for every Layer of Data.
+//
+// Called from Navigation
+// Calls Form
+//
+
 export default class Details extends Component {
   displayName: 'Details';
-  constructor(props) { 
-	super(props);
-	this.giveDescription = this.giveDescription.bind(this);
+  constructor(props) {
+    super(props);
+    this.state = {
+      form : false,
+      prepairedData : false,
+    }
+    this.giveDescription = this.giveDescription.bind(this);
   }
 
-  // Describe the Layer
-  async giveDescription(description){alert(description); }
-  render () {
-    const { layer, state, stateFunctions} = this.props;
-    //  Create the form
-    let formStuff = constructFormStuff(layer, stateFunctions);
+  // on keypress, check to see if a component rerenders, also construct the item to rerender.
+  componentDidMount(){ this.updateForm( ) }
+  componentWillReceiveProps(nextProps){ this.updateForm( ) }
 
-    // Check if the layer already contains data. If so. Grab it.
-    let removeButton = state.records ? true : false;
-    removeButton = !state.records ? false : state.records[layer.host + '&' + layer.service + '&' + layer.layer];
-    removeButton = !removeButton ? false :
+  // Prepare the Form
+  async updateForm( ){
+    // START - Translate Array->Object(key:value) to Object->(key:array)
+    let layer = this.props.layer;
+    let update = false;
+    let suggestions = layer.fields.map( (field, i) => {
+      if ( !field || field.filter == false ){ return [] }
+
+      let prepSug = field.preloadfilter ? field.preloadfilter : false ;
+      prepSug = ( !prepSug && layer['currentFormsData'] ) ? layer['currentFormsData'] : prepSug;
+      if(typeof(prepSug) == 'boolean'){ return [] }
+      // Format The Suggestion Accordingly
+      let suggestions = prepSug.map( (suggestion, i) => {
+        if ( layer.host == 'bniaApi'){ 
+          if( suggestion.block_lot ){ suggestion = suggestion[field.name.trim()] }
+        }
+        if ( layer.host == 'arcgis' ){
+          if(suggestion && suggestion.attributes){
+            suggestion = suggestion.attributes[field.name.trim()] 
+          }
+        }
+        if ( layer.host == 'socrata' ){
+          if(suggestion){ suggestion = suggestion[field.name.trim()] }
+          console.log(suggestion);
+        }
+        return suggestion
+      } )
+
+      var mySet = new Set(); // Filter Distinct Suggestions & Sort Distinct Suggestions
+      let unique = suggestions.filter( x => { var isNew = !mySet.has(x); if (isNew) mySet.add(x); return isNew && (x === 0 || x); });
+      let uniqueAndSorted = unique.sort( (a, b) => { if(a < b){ return -1}; if(a > b){return 1}; return 0; } ) 
+if ( layer.host == 'socrata' ){ console.log(uniqueAndSorted) };
+      return uniqueAndSorted
+    } )
+    this.setState( { 'prepairedData' : suggestions } )
+  } 
+  
+  // RENDER
+  async giveDescription(description){alert(description); } 
+  render () {
+    const { prepairedData } = this.state;
+    const { layer, state, stateFunctions} = this.props;
+    
+    // Show the 'Remove' Button
+    let removeButton = !layer.dataWithCoords ? false :
       <button className='removeButton fa fa-times'
        onClick={stateFunctions.removed}
        title='Remove Layer'
        data-key={layer.key} />;
 
+    // Otherwise show the 'Go' and 'Search' Buttons
     let goButton = !layer.labelbutton ? '':
       <button className='GoButton fa fa-angle-double-right'
-       onClick={stateFunctions.submitted}
+       onClick={stateFunctions.handleSubmit}
        title='Search Layer'
        data-key={layer.key} />;
-    let searchButton = 
+    let searchButton = !layer.searchfields ? '' :
       <button type='submit' className='searchButton'
-        onClick={stateFunctions.submitted}
+        onClick={stateFunctions.handleSubmit}
         title='Search!'
         data-key={layer.key} >
-        Search! 
-      </button>;
-
-    // Reset Button
+        Search!
+      </button>; 
+    // Show the reset button if searchfields is true
     let resetButton = !layer.searchfields ? '' :
-      <button type='reset' title='Clear Search' onClick={stateFunctions.reset} >Reset </button>
-    let layerDescription = layer.layerdescription ? layer.layerdescription : ''
-    return (
-	  <details>
-	    <summary title={ layerDescription } > {layer.alias} { removeButton }{ goButton } </summary>
-	    <form data-key={layer.key}>
-	      { formStuff }
-	  	  {searchButton}
-	  	  {resetButton}
-	    </form>
-	  </details>
-    )
-  }
-}
+      <button type='reset' title='Clear Search' onClick={stateFunctions.reset} >Reset </button>;
 
+    // Let the user know how many matches were found.
+    let respLen = layer['currentFormsData'] ? layer['currentFormsData'].length : false; let alert = '';
+    if( !layer.searchfields ) ''
+    else if( respLen === 0) alert = <p title='Query Hint' className='queryHint'> No Records Found </p>
+    else if( respLen == 1 ) alert = <p title='Query Hint' className='queryHint'> Exact Match! </p>
+    else if( respLen >= 100 ) alert = <p title='Query Hint' className='queryHint'> Top 100 Records by attribute </p>
+    else if( respLen >= 2) alert = <p title='Query Hint' className='queryHint'> {respLen} records found </p>
+    else alert = <p title='Query Hint' className='queryHint'> Enter Query </p>
 
+    let layerDescription = layer.layerdescription ? layer.layerdescription : '';
+    let infoButton = layerDescription ? '' : '';
+     // <button className='fa fa-info'
+     //  onClick={ this.alert() }
+     //  title='Description' />;
 
-// handle every field in the form and construct its input (when appropriate).
-function constructFormStuff(layer, stateFunctions) {
-	return Object.keys(layer.fields).map( (field, i) => {
-	  field = layer.fields[field];
-	  // Check data at field
-	  if ( field == undefined || field == null || (Object.keys(field).length === 0 && field.constructor === Object ) || field.filter == false ){ return }
-
-	  // Prepair bound suggestions
-	  let suggestionData = [];
-	  if ( field.data ){ suggestionData = field.data; }    
-	  if( field.boundto ){
-		let boundToField = layer.fields.filter(function(k) { return k.name.trim() == field.boundto.trim()  })[0];
-		let boundToName = boundToField.name.trim();
-		let boundToData = boundToField.data ? boundToField.data : [];
-		let curVal = field.curVal ?  field.curVal.trim().toUpperCase() : 'Enter Text';
-		curVal = curVal == 'Enter Text' ? '' : curVal;
-		// Only swap if datasets the input value exists in the foreign dataset
-		let primaryFilter = boundToData.filter(function(k) { return k[boundToName].toUpperCase().includes(curVal)  });
-		if( primaryFilter.length >= 1 ){
-		  suggestionData = primaryFilter; 
-		}
-	  }
-	  
-	  // Create the Input
-	  let input = field.filtertype == 'dropdown' ? 
-		<Dropdownlist key={i+'l'} 
-		  inputChange={stateFunctions.inputChange} 
-		  field = {field} layer={layer} 
-		  suggestions={suggestionData}/>
-		  : 
-		<Datalist key={i+'l'} 
-		  inputChange={stateFunctions.inputChange} 
-		  field = {field} layer={layer} 
-		  suggestions={suggestionData}/>;
-	  let descr = !field.description ? 'Search by Field' : field.description;
-	  return ( [ <label key={i} title={ descr } > {field.alias} : </label>, input ] )
-	})
-}
-
-// Return only objects with distinct Key:Value's
-// Used for Removing duplicate suggestions & preping the actual values
-function removeDuplicates(myArr, prop) {
-  // strip out false values - except for 0
-  myArr = myArr.filter(function(e){ return e === 0 || e });
-  return myArr;
-  return !myArr ? [] : myArr.filter((obj, pos, arr) => {
-	return arr.map(mapObj => {
-	  return mapObj[prop.trim()]
-	}).indexOf(obj[prop.trim()]) === pos;
-  })
-}
-
-// Dropdown Input
-class Dropdownlist extends Component {
-  render () {
-  	const { inputChange, field, layer, suggestions } = this.props;
-    let fieldName = field.name.trim();
-	let placeholdertext = 'N/A';
-	let suggestionData = removeDuplicates(suggestions, fieldName);
-	if( suggestionData.length == 1 ){
-	  let val = suggestionData[0][fieldName]
-	  return ( <input data-field={fieldName} disabled={true} value={val} /> 
-	  ) 
-	}
-	// Only Dropdown if Suggestions Exist
-	if( suggestionData.length > 1 ){
-	  return ( 
-	    <select data-field={fieldName}> { ( !suggestionData ||  suggestionData == [] ) ? '' : (
-	      suggestionData.sort( function(a, b){
-	        if(a < b) return -1;
-	        if(a > b) return 1;
-	        return 0;
-	      } ),
-          suggestionData.map(function(option, i){
-            return ( <option key={i} value={option}> {option} </option> 
-            )
-          } )
-        ) }
-        </select> 
-	  )
-	}
-	return ( 
-	  <input data-field={fieldName} placeholder={placeholdertext} disabled={true} /> 
-	) 
-  }
-}
-
-// Textbox Dropdown Input
-class Datalist extends Component {
-  render () {
-	const { inputChange, field, layer, suggestions } = this.props;
-	
-  	//console.log('Textbox : ' + layer.alias + " " + field.alias)
-    let fieldName = field.name.trim();
-	let onChangeEvent = field.preloadfilter ? '' : inputChange;
-	let suggestionData = removeDuplicates(suggestions, fieldName);
-	if( suggestionData.length == 1 ){
-		// So greenpatterns is a simpler structure than ArcGis suggestionData[0][fieldName]
-	  return ( <input data-field={fieldName} disabled={true} value={suggestionData[0]} /> 
-	) }
-    let suggestionsData = ( !suggestionData ||  suggestionData == [] ) ? '' : 
-      suggestionData.map(function(option, i){
-        return <option key={i} value={option} /> 
-      } )
-	// Dropdown box suggestions
-    return (
-      [
-        <input key='1' list={field.name}  name={name}
-          placeholder='Enter Text' 
-          onChange={inputChange}
-          data-field={fieldName}
-        />,
-        <datalist key='2' id={field.name}> 
-          { suggestionsData }  
-        </datalist>
-      ]
-    )
+    return <details className='detailInnerContent'>
+        <summary title={ layerDescription } > {layer.alias} { infoButton }{ removeButton }{ goButton } </summary>
+        <form data-key={layer.key} className='detailInnerContent'>
+          { alert }
+          <Form layer={layer} stateFunctions={stateFunctions} prepdSug={prepairedData}  /> 
+          {searchButton}
+          {resetButton}
+        </form>
+      </details>
   }
 }

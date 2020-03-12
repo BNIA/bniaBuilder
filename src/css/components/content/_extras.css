@@ -32,7 +32,7 @@
     padding: 					.75rem 1rem;
     margin-bottom: 				1rem;
     list-style: 				none;
-    background-color:			var(--bgcolor4);
+    background:			var(--bgcolor4);
 }
 
 
@@ -65,7 +65,7 @@
     border-top: 				2px solid #eceeef
 }
 .table .table {
-    background-color: 			#fff
+    background: 			#fff
 }
 .table-sm td,
 .table-sm th {
@@ -83,10 +83,10 @@
     border-bottom-width: 		2px
 }
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: 			rgba(0, 0, 0, .05)
+    background: 			rgba(0, 0, 0, .05)
 }
 .table-hover tbody tr:hover {
-    background-color: 			rgba(0, 0, 0, .075)
+    background: 			rgba(0, 0, 0, .075)
 }
 
 
@@ -190,7 +190,7 @@ small {
 .mark,
 mark {
     padding: 			.2em;
-    background-color: 	#fcf8e3
+    backgrouns: 	#fcf8e3
 }
 
 /* Block Quotes */
@@ -229,7 +229,7 @@ mark {
 }
 .img-thumbnail {
     padding: 			.25rem;
-    background-color: 	#fff;
+    background: 	#fff;
     border: 			1px solid #ddd;
     border-radius: 		.25rem;
     -webkit-transition:	all .2s ease-in-out;

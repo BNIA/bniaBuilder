@@ -2,7 +2,7 @@ workbox.skipWaiting();
 workbox.clientsClaim();
 
 workbox.routing.registerRoute(
-  new RegExp('https://hacker-news.firebaseio.com'),
+  new RegExp('https://insertregularexpressionhere.ect'),
   workbox.strategies.staleWhileRevalidate()
 );
 

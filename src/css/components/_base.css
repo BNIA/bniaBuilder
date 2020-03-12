@@ -11,9 +11,60 @@
  *
  */
 
-::-webkit-scrollbar-button { background-color: var(--scrollbar-button_background-color); }
-::-webkit-scrollbar-thumb {  background-color: var(--scrollbar-thumb_background-color); }
-::-webkit-scrollbar {  background-color:var(--scrollbar_background-color); }
+.ReactTable{
+    font-size: 16px;
+    max-width: 750px;
+    padding:10px;
+    align:center;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 750px;
+}
+details > .ReactTable{
+  max-width: 100%;
+}
+
+*{
+  -webkit-tap-highlight-color:  rgba(255, 255, 255, 0); 
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.loader {
+  display:none;
+  margin:auto;
+  border: 8px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 8px solid #3498db;
+  width: 30px;
+  height: 30px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+::-webkit-scrollbar-button { background: var(--scrollbar-bar); }
+::-webkit-scrollbar-thumb {  background: var(--scrollbar-bar); }
+::-webkit-scrollbar {  background:var(--scrollbar-ramp); }
+
+::-webkit-scrollbar-button:hover { background:var(--scrollbar-hover); }
+::-webkit-scrollbar-button:active  {  background:var(--scrollbar-bar); }
+
+::-webkit-scrollbar-thumb:hover { background:var(--scrollbar-hover); }
+::-webkit-scrollbar-thumb:active {  background:var(--scrollbar-bar); }
+
 @media all and (max-width: 800px) { ::-webkit-scrollbar {  width:20px;  } }
 @media all and (min-width: 801px) { ::-webkit-scrollbar {  width:8px; } }
 @media all and (max-device-width: 801px) { 
@@ -21,7 +72,9 @@
   ::-webkit-scrollbar-thumb { display: none; }
   ::-webkit-scrollbar { display: none; } 
 }
- 
+
+section { display:inline-block}
+
 p {margin: 0}
 h1,h2,h3,h4,h5,h6 {
     font-weight: 600;
@@ -49,13 +102,17 @@ input[type=radio]:disabled {
     cursor: not-allowed
 }
 select, input{ 
-  width: calc(100% - 20px);
   font-size: calc( var(--details-font_size) );
   margin-top: .25em;
   margin-bottom: .25em;
+  width: 150px;
 }
-input:active, input:hover, input:focus,
-select:active, select:hover, select:focus{
+option{
+  width: 20px !important;
+}
+/* width : calc(100% - 20px); */
+input:active, input:focus,
+select:active, select:focus{
   font-size: calc( var(--details-font_size) + .4em);
   color: var(--a-hover-focus_color);
   margin-top: .05em;
@@ -70,7 +127,6 @@ input[type=month] {-webkit-appearance: listbox }
 input[type=search] { -webkit-appearance: none;}
 label{
     margin-top: 5px;
-    display: block;
 }
 figure{ margin:0px;}
 img {
@@ -96,32 +152,27 @@ ul, menu, dir {
     padding: 0;
 }
 [hidden] { display: none!important; }
-#mapid:focus{border: none;}
-.leaflet-bar a.leaflet-disabled{ color: black;}
-#mapid{
-  cursor: grab;
-  z-index: 0; height: 100% !important; }
-.legendContainer{
-  padding:10px;
-}
 ul, li{ margin:0; padding:0;}
 
-*:focus{ border: var(--all-focus_border); }
-button:hover, a:hover{ background-color: var(--a_button-hover_background-color);}
-button:focus, a:focus{ background-color: var(--a_button-focus_background-color);}
-button:active, a:active{ background-color: var(--a_button-active_background-color);}
+/* BUTTONS, HYPERLINKS */
 
 a, button{
   cursor: pointer; 
   border: none; 
   outline: none;
-  background: none;
-  color: var(--a_button_color);
-}
-button:hover, button:focus,
-a:hover, a:focus{ 
-  font-weight: 700;
-  color: var(--a-hover-focus_color);
+  background: var(--a_background);
+  color: var(--a_color);
 }
 
-section { display:inline-block}
+button:hover, a:hover{ 
+  background: var(--a_background_hover);
+  color: var(--a_hover_color);
+}
+button:focus, a:focus{
+  background: var(--a_background_focus);
+  color: var(--a_color_focus);
+}
+button:active, a:active{
+  background: var(--a_background_active);
+  color: var(--a_color_active);
+}

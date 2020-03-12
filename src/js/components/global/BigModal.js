@@ -1,96 +1,93 @@
 import React, { Component } from 'react';
 const e = React.createElement;
-import ReactDisqus from 'react-disqus';
-import {SimpleDetails, sortDictionaries} from 'js/utils/utils';
+import { SimpleDetails, downloadCsv } from 'js/utils/utils';
+import ReactTable from "react-table";
 
-export default class Modal extends Component {
+export default class BigModal extends Component {
   displayName: 'Modal';
   constructor(props) {
     super(props);
     this.state = { 
-      heading: 0,
+      heading: 0, 
+      identifier : 'placeholder',
       coordinates: [0, 0],
     }
   }
-
   // Add Modal Event Listeners after the component mounts
-  componentDidMount() { addModalListeners() }
-
-  componentDidUpdate(prevProps, prevState){
-  	let feature = this.props.state.feature;
-  	if(feature && feature !== prevProps.state.feature){
-  	  let coords = [feature.properties.xcord, feature.properties.ycord];
-  	  this.setState({ coordinates: coords, firstTimeFiring : false })
-  	}
-  }
-
+  componentDidMount(){ addModalListeners() }
   // Street View Utility
   async rotateView(rotateBy) { this.setState({ heading : this.state.heading + rotateBy }) }
 
   render() {
-  	console.log('loadingbigmodal');
     const { state } = this.props;
-    if(!state.records){ return null}
-    // Style
+    let details = state.details;
+    let feature = details.clickedRecord;
+    let props = feature.properties;
+	let coords = '';
+	let flag = false;
+	if(feature.geometry.coordinates.length == 2){ flag=true; coords = feature.geometry.coordinates; }
+	else{ coords = feature.geometry.coordinates[0]; }
+	let coordinates = coords[0] && coords[0].length ? [ coords[0][0], coords[0][1] ] : coords;
+	coordinates = flag ? [ coords[0] , coords[1] ] : coordinates;
+    let [lng, lat] = coordinates;
+    // Street View
+    let styleContainer = { width: '50%', margin: 'auto', align : 'center' }
     let styleBtn = { width: '50px', height: '50px', border: '1px solid black', margin: '5px', borderRadius: '5px' }
+    let streetViewApiKey = "&fov=100&heading=" + this.state.heading + "&pitch=10&key=AIzaSyBwEaG4Uj2rUeM5sjHPUobnUPQz_jHuq9s";
+    let streetViewApiURL = "https://maps.googleapis.com/maps/api/streetview?size=800x600&location=";
+    let googleStreetViewSrc = streetViewApiURL + lat + "," + lng + streetViewApiKey;
+    let linkToGMaps = 'http://www.google.com/maps/place/'+lat+','+lng;
+    let linkToGSV = 'http://maps.google.com/maps?q=&layer=c&cbll='+lat+','+lng;
+	let givenName = 'Rotate View';
     // Details
     let controller = '';
     let clickedDetails = '';
-    let reactDiscus = '';
-    let featuresDictionary = '';
-    let featuresConnectedDictionaries = '';
-    let shortname = 'bold-1';
-    let feature = state.feature;
-    let googleStreetViewSrc = '';
-    let streetViewApiKey = '';
-    let streetViwApiKey = '';
-    let [lng, lat] = this.state.coordinates;
-    if (feature) {
-      // Street View
-      let streetViewApiKey = "&fov=100&heading=" + this.state.heading + "&pitch=10&key=AIzaSyBwEaG4Uj2rUeM5sjHPUobnUPQz_jHuq9s";
-      let streetViewApiURL = "https://maps.googleapis.com/maps/api/streetview?size=800x600&location=";
-      googleStreetViewSrc = streetViewApiURL + lat + "," + lng + streetViewApiKey;
-	  console.log(state.featuresDictionary);
-	  console.log(state.feature.properties);
-	  console.log(state.featuresConnectedDictionaries);
-      // Data
-      featuresDictionary = state.featuresDictionary;
-      featuresConnectedDictionaries = state.featuresConnectedDictionaries;
-      clickedDetails = ClickedDetails( featuresDictionary, feature.properties)
+    if (details) {
+      // GSV address label
+	  if( (props.name)  && props.name    != ' ' ){ givenName = props.name }
+	  if( (props.Name)  && props.Name    != ' ' ){ givenName = props.Name }
+	  if( (props.NAME)  && props.NAME    != ' ' ){ givenName = props.NAME }
+	  if( props.address && props.address != ' ' ){ givenName = props.address }
+	  if( props.ADDRESS && props.ADDRESS != ' ' ){ givenName = props.ADDRESS }
 
-      // Map the groups, subgroups and layers into corresponding 'Details' panes
-      controller = DetailsPane( featuresDictionary, sortDictionaries(featuresConnectedDictionaries), feature.properties);
-      reactDiscus = < ReactDisqus shortname = { shortname }
-      />;
+      // Construct the Clicked Detials
+      clickedDetails = ClickedDetails( details )
+
+      controller = DetailsPane( state );
     }
     
     let style = {display:'none'}
     return ( 
       < div className = "modal_big_wrapper" style={style}>
 		< section className='modal_big_content'>
-          < details open > 
-            < summary > Street View < /summary > 
-            < img align = "center" src = { googleStreetViewSrc } /> 
+          < details open> 
+            < summary > STREET VIEW < /summary >
+            <a href={linkToGMaps} style={{color:'blue',textDecoration:"underline"}} target="_blank" rel="noopener noreferrer" >Maps</a>
+            <br/>
+            <a href={linkToGSV} style={{color:'blue',textDecoration:"underline"}} target="_blank" rel="noopener noreferrer" >StreetView</a>
+            <br/>
+            < img alt="Google Street View Image" style = { styleContainer } src = { googleStreetViewSrc } /> 
             < div align = "center" > 
+              <p key={'givenName'}>{givenName}</p>
               < button style = { styleBtn } onClick = { () => this.rotateView(-45) } > Left < /button> 
               < button style = { styleBtn } onClick = { () => this.rotateView(45) } > Right < /button> 
             < / div > 
           < /details> 
           < details open> 
-            < summary > Details < /summary > 
-            { clickedDetails} 
+            < summary > DETAILS < /summary > 
+            { clickedDetails }
             { controller }
           < /details> 
-          < details open> 
-            < summary > Discussion  < /summary > 
-            {reactDiscus}
-          < /details>
-		  < button  id='toggle_view' className = "close_big_modal" tabIndex = "0" > OK < /button> 
+		  < button className = "toggle_view close_big_modal" tabIndex = "0" > OK < /button> 
 		< / section >
       < /div >
-    );
+    ) 
   }
 }
+
+// CloseModalBtn
+//toggleview -> TableBtn, MapBtn
+//openbigmodal -> OpenBigModal
 
 // Onclick Event Listener to remove AND open the Modal
 function addModalListeners(){
@@ -103,118 +100,132 @@ function addModalListeners(){
     if (event.target.classList.contains('modal_big_wrapper')) { 
       event.target.style.display = "none"; 
     }
-
     // The Show All Button was clicked.
     if (event.target.classList.contains('open_big_modal')) { 
       document.getElementsByClassName('modal_big_wrapper')[0].style.display = "block"
     }
-
-  });
+  }, {passive: true});
 }
 
 
-
-
-
+//
+//
 // COMPONENT 
-const ClickedDetails = (dictionary, props) => {
+const ClickedDetails = (details) => {
   let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
-  let alias = dictionary.alias;
-  
-  let rightHand = dictionary.returnparcel;
-  let pData = dictionary.clickedParcelData;
+  let styleConnectedArticle = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
+  let alias = details.clickedLayer.alias;
+  let pData = details.clickedLayer.connectedRecords;
+  if (pData == undefined ){ return ''}
+  let returnThis = []
   // Sort Descending by 'YEAR'
-  if(pData.length > 1){ pData.sort(function(a, b) { return b.Year - a.Year; }); }
-  // Loop through all our records
-  let stackOfRecords = pData.map( (record, i) => {
-  	// For each field
-    let detail = Object.keys(record, i ).map( (key, i) => {
-      // Fallback value if we have an error.
-      let alias = key;
-      // This is one columns values in the record of information
-      let parcelData = record[key];
-
+  if(pData && pData.length > 1){ pData.sort( (a, b) => { return b.Year - a.Year; }); }
+  let styleClickedArticle = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }  
+  // If the dictionary has only one connected record
+  if(pData && pData.length == 1){
+  	let record = pData[0];
+    let detail = Object.keys(record).map( (key, index) => {
 	  // Find the Field Alias from our dictionary matching the Key of our new inbound data.
-	  let name = dictionary.fields.filter(field => {
-	  	return field.name.trim() == key.trim()
-	  } )
-	  // USE THE ALIAS FOR THE FIELDS THAT MATCH
-	  if(name.length){ alias = name[0].alias; }
-
-	  // Only show fields we want to show
-	  let val = rightHand ? true : false;
-	  return !val ? false : ( 
-		< div key = { i } style = { styleText } > 
-		  < b > { alias } < /b> : { parcelData }
-		< /div>
+	  let field = details.clickedLayer.fields.filter(field => { return field.name.trim() == key.trim() } )
+	  // Render only IFF a matching field from our dictionary
+	  let alias = field.length ? field[0].alias : false
+	  // Render only IFF that field tells us to
+	  alias = !alias ? alias : field[0].righthand ? alias : false;
+	  return !alias ? false : ( 
+	    < div key = {index} style = { styleText } >  
+		  < b > { alias } < /b> : { record[key] } 
+	    < /div>
 	  )
-    } )
-    let style = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
-    return <article key={ i } style={style} > { detail } </article>
-  } )
-  return <div > {stackOfRecords} </div>
+    } );
+    detail = <article key='bigmodaltitle' style={styleConnectedArticle} > { detail } </article>
+    returnThis.unshift(detail)
+  }
+  // If the dictionary has more than one record.
+  else if(pData && pData.length > 1){
+    // Sort Descending by 'YEAR'
+  	if(pData.length > 1){ pData.sort( (a, b) => { return b.Year - a.Year; }); }
+    // if field.righthand assign property attributes into a new object.
+    let revealthese = details.clickedLayer.fields.filter(field => field.righthand == true).map(field => ({ Header: field.alias, accessor: field.name }))
+    returnThis.push( <ReactTable key={'reactTable'} data={ pData } columns={ revealthese } defaultPageSize={5} className="-striped -highlight" /> )
+  }
+  
+  returnThis.unshift(<h2 key={'detailsHeader'}>{alias}</h2>)
+  return returnThis
 };
 
+
 // COMPONENT -> ConnectDetails & SimpleDetails
-const DetailsPane = (featuresDictionary, availableGroups, properties) => {
-  return availableGroups.map(function(group, i) {
-	if (group.length == 1 && group[0].length == 1) { return ConnectDetails(featuresDictionary, group[0][0], properties); }
-	let detailContent = group.map(function(subgroup, i) {
-	  if (subgroup[0]['subgroup'] == false) {
-		let subGroupItems = subgroup.map(function(dict, i) { return ConnectDetails(featuresDictionary, dict, properties); } )
-		return subGroupItems
-	  }
-	  let subgroupContent = subgroup.map(function(dict, i) { return ConnectDetails(featuresDictionary, dict, properties); } )
-	  return subgroupContent;
-	});
-	return detailContent;
-  } );
+const DetailsPane = ( state ) => {
+  
+  // Map through the all the groups
+  let details = state.details
+  let groups = details.foreignLayers
+  let returnThis = groups.map( group => {
+
+	// otherwise map through the entries in the group, typically layers but may contain subgroups
+	return group.map( subgroup => { 
+	  return subgroup.map( layerDetials => { 
+	    let layer = state.dictionaries.filter( k => { return k.service+k.layer+'' === Object.keys(layerDetials)[0]  })[0];
+	    return ConnectDetails(layerDetials, layer) 
+	  } ) 
+	} )
+  } )
+  return returnThis
 }
 
-// Display all the connected details from a connected dictionary
-const ConnectDetails = (clickedDictionary, dictionary, props) => {
-  let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
-  let alias = dictionary.alias;
-  let rightHand = dictionary.returnparcel;
-  let detailedInfo = false;
-  let pData = dictionary.clickedParcelData;
-  // If the dictionary has parcel data.
-  if(pData && pData.length){
-  	// Sort Descending by 'YEAR'
-  	if(pData.length > 1){ pData.sort(function(a, b) { return b.Year - a.Year; }); }
-  	// Loop through all our records
-  	let i = 0;
-    detailedInfo = pData.map( ( parcelRecord , i) => {
-      // Loop through all the record properties
-      let record = Object.keys(parcelRecord).map( (key, i) => {
-      	let fieldVal = parcelRecord[key];
-      
-		// Find the Field Alias from our dictionary matching the Key of our new inbound data.
-	    let name = dictionary.fields.filter(dictField => {
-		  return dictField.name.trim() == key.trim()
-		} )
-		// USE THE ALIAS FOR THE FIELDS THAT MATCH
-		if(name.length){ 
-		  alias = name[0].alias; 
-		}
-		// Only show fields we want to show
-		let val = rightHand ? true : false;
 
-		return !val ? false : ( 
-		  < div key = { i } style = { styleText } > 
-			< b > { alias } < /b> : {fieldVal}	
-	      < /div>
-		)
-      } )
-      let style = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
-      return <article key={ i } style={style} > { record } </article>
+//
+//
+// Display all the connected details from a connected dictionary
+//
+const ConnectDetails = (details, dict) => {
+  let styleText = { padding: '3px', paddingLeft: '10px', width: '90%', textAlign: 'left' }
+  let styleConnectedArticle = { margin : '2px', padding:'4px', border : 'thick solid #ccc' }
+  let alias = dict.alias;
+  let pData = dict.connectedRecords;
+  // If the dictionary has only one connected record
+  if(pData && pData.length == 1){
+  	let record = pData[0];
+    let detail = Object.keys(record).map( (key, index) => {
+	  // Find the Field Alias from our dictionary matching the Key of our new inbound data.
+	  let field = dict.fields.filter(field => { return field.name.trim() == key.trim() } )
+	  // Render only IFF a matching field from our dictionary
+	  let alias = field.length ? field[0].alias : false
+	  // Render only IFF that field tells us to
+	  alias = !alias ? alias : field[0].righthand ? alias : false;
+	  return !alias ? false : ( 
+	    < div key = { index } style = { styleText } >  
+		  < b > { alias } < /b> : { record[key] } 
+	    < /div>
+	  )
     } );
+    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download all {alias}</button>;
     return (
-      <details key={i}> 
-        <summary> {alias} </summary>
-       {detailedInfo}
+     <details key={'bigmodal'+alias} open> 
+       <summary> {alias} </summary> {download}
+       <article style={styleConnectedArticle} > { detail } </article>
      </details>
     )
   }
+  // If the dictionary has parcel data.
+  else if(pData && pData.length > 1){
+    // Sort Descending by 'YEAR'
+  	if(pData.length > 1){ pData.sort(function(a, b) { return b.Year - a.Year; }); }
+    // if field.righthand assign property attributes into a new object.
+    let revealthese = dict.fields.filter(field => field.righthand == true).map(field => ({ Header: field.alias, accessor: field.name }))
+    let download = <button onClick = { () => downloadCsv( dict ) } className='downloadall'> Download all {alias}</button>;
+    return (
+      <details key={'bigmodal'+alias} open> 
+        <summary> {alias} </summary> {download}
+	    <ReactTable 
+	      data={ pData }
+	      columns={ revealthese }
+	      defaultPageSize={5}
+	      showPageSizeOptions = {false}
+	      className="-striped -highlight"
+	    /> 
+      </details>
+    )
+  }
   return false
-};
+}
